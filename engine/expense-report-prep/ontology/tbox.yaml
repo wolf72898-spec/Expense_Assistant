@@ -1,0 +1,133 @@
+# T-box — expense segment of the personal ontology (concepts + property signatures)
+# Namespace exp: overlays the personal root pcg:. Extend freely; `onto validate` checks the A-box against this file.
+segment: expense
+version: 0.6.0
+namespaces:
+  pcg: personal cognitive graph root
+  exp: expense task overlay
+
+classes:
+  pcg:Agent: {}
+  pcg:Person: {subClassOf: pcg:Agent}
+  exp:Employee: {subClassOf: pcg:Person, doc: The workspace owner (node id person:self) or colleagues/attendees}
+  exp:Organization: {subClassOf: pcg:Agent}
+  exp:Project: {doc: Cost object an expense is charged to}
+  exp:CostCenter: {}
+  exp:Trip: {doc: A business trip grouping several items}
+  exp:ExpenseReport: {}
+  exp:ReportVersion: {doc: One published, immutable zip of a report}
+  exp:ExpenseItem: {}
+  exp:Evidence: {}
+  exp:ExpenseCategory: {doc: Individuals mirror the Category enum of the report schema, e.g. category:lodging}
+  exp:Merchant: {subClassOf: pcg:Agent}
+  exp:Hotel: {subClassOf: exp:Merchant}
+  exp:Airline: {subClassOf: exp:Merchant}
+  exp:RailOperator: {subClassOf: exp:Merchant}
+  exp:TaxiService: {subClassOf: exp:Merchant}
+  exp:Restaurant: {subClassOf: exp:Merchant}
+  pcg:Place: {}
+  exp:City: {subClassOf: pcg:Place}
+  exp:Station: {subClassOf: pcg:Place}
+  exp:Airport: {subClassOf: pcg:Place}
+  exp:Site: {subClassOf: pcg:Place, doc: Client site / office}
+  exp:Route: {doc: Directed origin→destination pair the user travels}
+  exp:PaymentInstrument: {}
+  exp:PaymentAccount: {doc: A personal bank card / account that receives reimbursements (number kept local, masked in exports)}
+  exp:CorporateBillingProfile: {doc: Reusable company billing identity referenced by expense / invoice / onboarding skills}
+  exp:InvoiceTitle: {subClassOf: exp:CorporateBillingProfile, doc: 发票抬头 — the buyer identity (name, tax id, address, phone, bank, account) invoices must carry}
+  exp:Policy: {}
+  exp:FinancialCredential: {doc: 票据 — any voucher that evidences a payment (发票, 客票, 收据, 小票, 回单…); a file (exp:Evidence) embodies it}
+  exp:TaxInvoice: {subClassOf: exp:FinancialCredential, doc: 中国税务发票 (GB/T 42965.1 基本要素)}
+  exp:DigitalInvoice: {subClassOf: exp:TaxInvoice, doc: 数电发票（全面数字化的电子发票）}
+  exp:VATSpecialInvoice: {subClassOf: exp:TaxInvoice, doc: 增值税专用发票}
+  exp:VATOrdinaryInvoice: {subClassOf: exp:TaxInvoice, doc: 增值税普通发票}
+  exp:TransportationCredential: {subClassOf: exp:FinancialCredential}
+  exp:RailwayETicket: {subClassOf: exp:TransportationCredential, doc: 铁路电子客票 (GB/T 42965.2 铁路旅客运输服务)}
+  exp:AirETicketItinerary: {subClassOf: exp:TransportationCredential, doc: 航空运输电子客票行程单 (GB/T 42965.2 航空旅客运输服务)}
+  exp:TaxiReceipt: {subClassOf: exp:TransportationCredential}
+  exp:TollReceipt: {subClassOf: exp:TransportationCredential, doc: 通行费 (GB/T 42965.2)}
+  exp:FiscalReceipt: {subClassOf: exp:FinancialCredential, doc: 财政电子票据}
+  exp:BankReceipt: {subClassOf: exp:FinancialCredential, doc: 银行电子回单}
+  exp:HotelReceipt: {subClassOf: exp:FinancialCredential, doc: 酒店水单 / folio}
+  exp:ForeignInvoice: {subClassOf: exp:FinancialCredential, doc: 境外发票 (VAT/GST invoice etc.)}
+  exp:ForeignReceipt: {subClassOf: exp:FinancialCredential}
+  exp:PaperReceipt: {subClassOf: exp:FinancialCredential, doc: 纸质小票 — domestic or overseas}
+  exp:CardSlip: {subClassOf: exp:FinancialCredential, doc: 刷卡签购单}
+  exp:OtherReceipt: {subClassOf: exp:FinancialCredential}
+  exp:Standard: {doc: A data standard a credential conforms to (individuals std:…)}
+  exp:SpecialBusinessScenario: {doc: GB/T 42965.2 特定业务 scenario (individuals scenario:…)}
+  exp:ChargeCode: {doc: 费用归集码 / charge code an expense is booked against (usually belongs to a project)}
+  exp:Budget: {doc: 预算 — budget line (budget id) an expense draws on}
+  exp:RuleSet: {doc: Company rule set a report is governed by (standard / gm / vp …)}
+  exp:LedgerAccount: {doc: Chart of Accounts line (会计科目) an item is posted to}
+
+objectProperties:
+  exp:worksOn:          {domain: exp:Employee, range: exp:Project}
+  exp:memberOf:         {domain: exp:Employee, range: exp:Organization}
+  exp:hasCostCenter:    {domain: exp:Employee, range: exp:CostCenter}
+  exp:submitted:        {domain: exp:Employee, range: exp:ExpenseReport}
+  exp:hasVersion:       {domain: exp:ExpenseReport, range: exp:ReportVersion}
+  exp:supersedes:       {domain: exp:ReportVersion, range: exp:ReportVersion}
+  exp:hasItem:          {domain: exp:ExpenseReport, range: exp:ExpenseItem}
+  exp:itemOf:           {domain: exp:ExpenseItem, range: exp:ExpenseReport}
+  exp:supportedBy:      {domain: exp:ExpenseItem, range: exp:Evidence}
+  exp:forProject:       {domain: [exp:ExpenseReport, exp:ExpenseItem, exp:Trip], range: exp:Project}
+  exp:partOfTrip:       {domain: exp:ExpenseItem, range: exp:Trip}
+  exp:inCategory:       {domain: exp:ExpenseItem, range: exp:ExpenseCategory}
+  exp:paidAt:           {domain: exp:ExpenseItem, range: exp:Merchant}
+  exp:paidWith:         {domain: exp:ExpenseItem, range: exp:PaymentInstrument}
+  exp:governedBy:       {domain: exp:ExpenseReport, range: exp:Policy}
+  exp:locatedIn:        {domain: [exp:Merchant, pcg:Place], range: pcg:Place}
+  exp:origin:           {domain: exp:Route, range: pcg:Place}
+  exp:destination:      {domain: exp:Route, range: pcg:Place}
+  exp:onRoute:          {domain: exp:ExpenseItem, range: exp:Route}
+  exp:travelsRoute:     {domain: exp:Employee, range: exp:Route}
+  exp:stayedAt:         {domain: exp:Employee, range: exp:Hotel}
+  exp:usedMerchant:     {domain: exp:Employee, range: exp:Merchant}
+  exp:usesInstrument:   {domain: exp:Employee, range: exp:PaymentInstrument}
+  exp:typicalCategory:  {domain: [exp:Merchant, exp:Route], range: exp:ExpenseCategory}
+  exp:usedForProject:   {domain: [exp:Route, exp:Merchant], range: exp:Project}
+  exp:hasInvoiceTitle:  {domain: exp:Organization, range: exp:InvoiceTitle}
+  exp:billsTo:          {domain: exp:Employee, range: exp:InvoiceTitle, doc: the title this employee's invoices must be issued to}
+  exp:reimbursedTo:     {domain: exp:Employee, range: exp:PaymentAccount, doc: default account reimbursements are paid into}
+  exp:costAllocationContact: {domain: exp:Organization, range: pcg:Person, doc: who assigns cost-allocation / project numbers}
+  exp:defaultProject:   {domain: exp:Employee, range: exp:Project, doc: profile-level default cost allocation for new reports}
+  exp:hasChargeCode:    {domain: exp:Project, range: exp:ChargeCode}
+  exp:drawsOnBudget:    {domain: [exp:Project, exp:ChargeCode, exp:ExpenseReport, exp:ExpenseItem], range: exp:Budget}
+  exp:chargedTo:        {domain: [exp:ExpenseReport, exp:ExpenseItem], range: exp:ChargeCode}
+  exp:underRuleSet:     {domain: exp:ExpenseReport, range: exp:RuleSet}
+  exp:embodiedIn:       {domain: exp:FinancialCredential, range: exp:Evidence, doc: the file(s) carrying the credential (XML/OFD/PDF/image)}
+  exp:evidences:        {domain: exp:FinancialCredential, range: exp:ExpenseItem}
+  exp:conformsTo:       {domain: exp:FinancialCredential, range: exp:Standard}
+  exp:hasScenario:      {domain: exp:FinancialCredential, range: exp:SpecialBusinessScenario}
+  exp:issuedBy:         {domain: exp:FinancialCredential, range: exp:Merchant}
+  exp:issuedTo:         {domain: exp:FinancialCredential, range: [exp:InvoiceTitle, pcg:Agent]}
+  exp:postedTo:         {domain: exp:ExpenseItem, range: exp:LedgerAccount}
+
+dataProperties:
+  exp:employeeId:   {domain: exp:Employee, type: string}
+  exp:department:   {domain: exp:Employee, type: string}
+  exp:email:        {domain: exp:Employee, type: string}
+  exp:role:         {domain: pcg:Person, type: string}
+  exp:accountNumber: {domain: exp:PaymentAccount, type: string, doc: full number — only in the local A-box and submitted packages; masked everywhere else}
+  exp:cnaps:        {domain: exp:PaymentAccount, type: string, doc: 联行号}
+  exp:projectName:  {domain: exp:Project, type: string}
+  exp:amount:       {domain: exp:ExpenseItem, type: number}
+  exp:currency:     {domain: exp:ExpenseItem, type: string}
+  exp:expenseDate:  {domain: exp:ExpenseItem, type: date}
+  exp:nightlyRate:  {domain: exp:Hotel, type: number, doc: last observed rate}
+  exp:status:       {domain: [exp:ExpenseReport, exp:ReportVersion], type: string}
+  exp:legalName:    {domain: exp:Organization, type: string}
+  exp:taxId:        {domain: exp:InvoiceTitle, type: string, doc: 纳税人识别号}
+  exp:registeredAddress: {domain: exp:InvoiceTitle, type: string}
+  exp:phone:        {domain: exp:InvoiceTitle, type: string}
+  exp:bankName:     {domain: exp:InvoiceTitle, type: string}
+  exp:bankAccount:  {domain: exp:InvoiceTitle, type: string, doc: the company's invoicing account printed on 专用发票 — never personal accounts}
+  exp:grade:        {domain: exp:Employee, type: string, doc: staff / manager / gm / vp — selects eligible company rule sets}
+  exp:chargeCode:   {domain: exp:ChargeCode, type: string}
+  exp:budgetId:     {domain: exp:Budget, type: string}
+  exp:fiscalYear:   {domain: exp:Budget, type: string}
+  exp:budgetStatus: {domain: exp:Budget, type: string, doc: open / closed / frozen}
+  exp:accountCode:  {domain: exp:LedgerAccount, type: string}
+  exp:jurisdiction: {domain: exp:FinancialCredential, type: string, doc: CN or ISO country code}
+  exp:trustRank:    {domain: exp:FinancialCredential, type: integer, doc: 4 xml · 3 ofd · 2 pdf · 1 image/paper}

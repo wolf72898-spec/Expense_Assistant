@@ -1,0 +1,55 @@
+{
+  "policy_id": "default-cn-2026.1",
+  "report_currency": "CNY",
+  "require_project": true,
+  "require_purpose": true,
+  "submission_window_days": 90,
+  "categories": {
+    "transport.air": {
+      "label": "机票",
+      "required_fields": ["trip.from", "trip.to", "trip.carrier_no"],
+      "required_evidence": [["air_itinerary", "e_invoice", "invoice"]],
+      "recommended_evidence": [["boarding_pass"]]
+    },
+    "transport.rail": {
+      "label": "火车/高铁",
+      "required_fields": ["trip.from", "trip.to"],
+      "required_evidence": [["rail_ticket", "e_invoice", "invoice"]]
+    },
+    "transport.taxi": {
+      "label": "市内交通",
+      "required_fields": ["trip.from", "trip.to"],
+      "required_evidence": [["e_invoice", "invoice", "taxi_receipt"]],
+      "recommended_evidence": [["payment_proof"]],
+      "cap": { "amount": 300, "per": "item", "mode": "warn" }
+    },
+    "transport.car_rental": { "label": "租车", "required_evidence": [["e_invoice", "invoice"]] },
+    "transport.fuel_toll": { "label": "油费/路桥", "required_evidence": [["e_invoice", "invoice", "receipt"]] },
+    "transport.other": { "label": "其他交通", "required_evidence": [["e_invoice", "invoice", "receipt"]] },
+    "lodging": {
+      "label": "住宿",
+      "required_fields": ["trip.city", "trip.check_in", "trip.check_out"],
+      "required_evidence": [["e_invoice", "invoice"], ["hotel_folio"]],
+      "cap": { "amount": 500, "per": "night", "by_city": { "北京": 800, "上海": 800, "深圳": 700, "广州": 700 }, "mode": "clip" }
+    },
+    "meals": {
+      "label": "餐费",
+      "required_evidence": [["e_invoice", "invoice", "receipt"]],
+      "cap": { "amount": 150, "per": "person", "mode": "warn" }
+    },
+    "per_diem": { "label": "出差补助", "required_fields": ["trip.city"], "required_evidence": [] },
+    "entertainment": {
+      "label": "业务招待",
+      "required_fields": ["attendees"],
+      "required_evidence": [["e_invoice", "invoice"], ["approval"]]
+    },
+    "conference": {
+      "label": "会议/培训",
+      "required_evidence": [["e_invoice", "invoice"]],
+      "recommended_evidence": [["agenda"]]
+    },
+    "communication": { "label": "通讯", "required_evidence": [["e_invoice", "invoice"]] },
+    "office_supplies": { "label": "办公用品", "required_evidence": [["e_invoice", "invoice"]] },
+    "other": { "label": "其他", "required_evidence": [["e_invoice", "invoice", "receipt"]] }
+  }
+}

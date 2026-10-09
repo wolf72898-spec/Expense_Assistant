@@ -1,0 +1,24 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# ── 上游参考代码（只读，不参与构建）──
+# upstream/ 是 bonc-ai/expense-assistant 与 ExpenseIQ 的完整 clone（自带 .git）。
+# 不入库，避免污染仓库体积与造成 License 归属混淆。
+# 真正参与构建的是 engine/，其内已附 LICENSE-UPSTREAM 与 CHANGES.md。
+upstream/
+
+# ── 运行时产物（由 scripts/init_policy.py / engine 生成）──
+data/
+company/policy.json
+
+# ── 本地环境 ──
+.DS_Store
+Thumbs.db
+*.log
+.env
+
+# ── 工具工作目录（含过程笔记，不属于项目源码）──
+.workbuddy/

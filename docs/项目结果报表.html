@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>青禾报销助手_wolf · 项目结果报表</title>
+<style>
+:root{
+  --bg:#f6f7f9; --card:#ffffff; --line:#e3e6ea; --line2:#eef0f3;
+  --ink:#1a1d21; --ink2:#4a5057; --ink3:#7b828b;
+  --ok:#1a7f4b; --okbg:#e8f5ed;
+  --warn:#b06a00; --warnbg:#fdf3e3;
+  --risk:#b3261e; --riskbg:#fdeceb;
+  --info:#1c5fb0; --infobg:#e9f1fb;
+  --accent:#1c5fb0;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:14px; line-height:1.65; padding:32px 20px 60px;
+}
+.wrap{max-width:1080px;margin:0 auto}
+
+/* header */
+.hd{border-bottom:2px solid var(--ink);padding-bottom:18px;margin-bottom:8px}
+.hd h1{font-size:26px;letter-spacing:.5px;font-weight:700}
+.hd .sub{color:var(--ink3);font-size:13px;margin-top:6px}
+.principle{
+  background:var(--ink);color:#fff;border-radius:8px;
+  padding:14px 18px;margin:18px 0 26px;font-size:14px;
+}
+.principle b{color:#ffd479}
+
+/* section */
+section{margin-bottom:30px}
+h2{
+  font-size:15px;font-weight:700;margin-bottom:12px;
+  padding-left:10px;border-left:4px solid var(--accent);
+}
+h2 span{color:var(--ink3);font-weight:400;font-size:12px;margin-left:8px}
+
+/* cards */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+.card .n{font-size:24px;font-weight:700;line-height:1.2}
+.card .l{font-size:12px;color:var(--ink3);margin-top:4px}
+.card.ok .n{color:var(--ok)} .card.info .n{color:var(--info)}
+.card.warn .n{color:var(--warn)} .card.plain .n{color:var(--ink)}
+
+/* table */
+table{width:100%;border-collapse:collapse;background:var(--card);
+  border:1px solid var(--line);border-radius:8px;overflow:hidden;font-size:13px}
+th{background:#f0f2f5;text-align:left;padding:9px 12px;font-weight:600;
+  color:var(--ink2);border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid var(--line2);vertical-align:top}
+tr:last-child td{border-bottom:none}
+td.c,th.c{text-align:center}
+
+/* tag */
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;
+  font-weight:600;white-space:nowrap}
+.t-ok{background:var(--okbg);color:var(--ok)}
+.t-warn{background:var(--warnbg);color:var(--warn)}
+.t-risk{background:var(--riskbg);color:var(--risk)}
+.t-info{background:var(--infobg);color:var(--info)}
+.t-gray{background:#eef0f3;color:var(--ink3)}
+
+.note{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--accent);
+  border-radius:6px;padding:12px 14px;font-size:13px;color:var(--ink2)}
+.note.warn{border-left-color:var(--warn)}
+.note.risk{border-left-color:var(--risk)}
+.note b{color:var(--ink)}
+
+ul{padding-left:20px;margin:6px 0}
+li{margin:3px 0}
+code{background:#f0f2f5;padding:1px 5px;border-radius:3px;
+  font-family:"SFMono-Regular",Consolas,monospace;font-size:12px}
+
+.bar{height:8px;background:#eef0f3;border-radius:4px;overflow:hidden;margin-top:5px}
+.bar i{display:block;height:100%;background:var(--ok)}
+
+.foot{color:var(--ink3);font-size:12px;text-align:center;
+  margin-top:36px;padding-top:16px;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hd">
+    <h1>青禾报销助手_wolf · 项目结果报表</h1>
+    <div class="sub">生成时间 2026-10-09 ｜ 交付形态：企业微信 / 钉钉 机器人 ｜ 基座 bonc-ai/expense-assistant（Apache-2.0）</div>
+  </div>
+
+  <div class="principle">
+    核心原则：<b>AI 负责引制度、做初判、标来源；事实认定权与付款决定权归财务岗。</b>
+    AI 的输出是「建议」，不是「结论」。
+  </div>
+
+  <!-- 概览 -->
+  <section>
+    <h2>一、总览</h2>
+    <div class="cards">
+      <div class="card ok"><div class="n">42 / 42</div><div class="l">自动化验证全部通过</div>
+        <div class="bar"><i style="width:100%"></i></div></div>
+      <div class="card info"><div class="n">4 / 4</div><div class="l">需求模块已落地</div></div>
+      <div class="card plain"><div class="n">2,347</div><div class="l">自研代码行数</div></div>
+      <div class="card plain"><div class="n">4,229</div><div class="l">复用内核行数</div></div>
+      <div class="card warn"><div class="n">4</div><div class="l">待你确认事项</div></div>
+      <div class="card plain"><div class="n">0</div><div class="l">License 违规</div></div>
+    </div>
+  </section>
+
+  <!-- 验证结果 -->
+  <section>
+    <h2>二、验证结果<span>全部实测通过，可重复运行</span></h2>
+    <table>
+      <thead><tr>
+        <th>验证项</th><th>命令</th><th class="c">项数</th><th class="c">结果</th><th>覆盖内容</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td>内控护栏</td><td><code>tests/test_policy_guards.py</code></td>
+          <td class="c">12</td><td class="c"><span class="tag t-ok">12 通过</span></td>
+          <td>职责分离、已发布不可变、状态机、历史版本追溯、空库拦截、变更审计</td>
+        </tr>
+        <tr>
+          <td>A/B/D 端到端</td><td><code>tests/test_e2e.py</code></td>
+          <td class="c">21</td><td class="c"><span class="tag t-ok">21 通过</span></td>
+          <td>制度问答、限额计算、拒答、越权拦截、跨人留痕、付款闸门</td>
+        </tr>
+        <tr>
+          <td>IM 意图路由</td><td><code>bot/router.py</code></td>
+          <td class="c">9</td><td class="c"><span class="tag t-ok">9 通过</span></td>
+          <td>意图识别、单号识别、财务/管理员权限门</td>
+        </tr>
+        <tr>
+          <td>引擎自检</td><td><code>engine/expense.py doctor</code></td>
+          <td class="c">—</td><td class="c"><span class="tag t-ok">ok: true</span></td>
+          <td>Python 3.13、pyyaml/jsonschema/pypdf 就绪、青禾制度包已识别</td>
+        </tr>
+        <tr>
+          <td>票据解析链路</td><td><code>prep init → report new → ingest → gaps</code></td>
+          <td class="c">—</td><td class="c"><span class="tag t-ok">跑通</span></td>
+          <td>数电票 XML 解析出金额 600.0、类目 conference，并产出核对项</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 四项需求 -->
+  <section>
+    <h2>三、四项需求落地情况</h2>
+    <table>
+      <thead><tr>
+        <th>需求</th><th>模块</th><th class="c">状态</th><th>关键实现</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><b>C</b> 制度维护</td><td><code>policy/</code></td>
+          <td class="c"><span class="tag t-ok">完成</span></td>
+          <td>状态机 draft→pending→published→superseded；已发布不可变；起草人≠审批人；旧版生效期收敛为新版前一日；字段级 diff 审计</td>
+        </tr>
+        <tr>
+          <td><b>A</b> 自助查有效制度</td><td><code>qa/</code></td>
+          <td class="c"><span class="tag t-ok">可跑</span></td>
+          <td>只检索生效条款；主题词硬门槛防误命中；金额走确定性计算器；越界与未覆盖转人工</td>
+        </tr>
+        <tr>
+          <td><b>D</b> 财务核事实</td><td><code>review/</code></td>
+          <td class="c"><span class="tag t-ok">可跑</span></td>
+          <td>按溯源标签分风险排队；inferred/ocr 必核；付款闸门硬阻断；复核动作留痕</td>
+        </tr>
+        <tr>
+          <td><b>B</b> 授权查本人单据</td><td><code>claim/</code></td>
+          <td class="c"><span class="tag t-warn">待接入</span></td>
+          <td>授权与权限隔离已就绪（越权返回「查无此单」）；数据源为 Mock，待接费控/ERP</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 制度数据 -->
+  <section>
+    <h2>四、制度库现状<span>QH-EXP-001@v1 已发布生效</span></h2>
+    <div class="cards">
+      <div class="card plain"><div class="n">14</div><div class="l">费用类目</div></div>
+      <div class="card plain"><div class="n">6</div><div class="l">票据规则</div></div>
+      <div class="card plain"><div class="n">3</div><div class="l">职级规则集</div></div>
+      <div class="card plain"><div class="n">10</div><div class="l">条款切片（供检索）</div></div>
+      <div class="card plain"><div class="n">3</div><div class="l">变更审计记录</div></div>
+    </div>
+    <div class="note warn" style="margin-top:12px">
+      <b>所有数值均为 PLACEHOLDER 占位</b>，不可直接用于真实报销判定。
+      引擎已自动报出一条空缺：<code>conference</code> 类目无会计科目映射（GAP-0002）。
+      这类空缺会在财务补制度时持续暴露，属待补项而非缺陷。
+    </div>
+  </section>
+
+  <!-- 开源合规 -->
+  <section>
+    <h2>五、开源调研与 License 合规</h2>
+    <table>
+      <thead><tr>
+        <th>仓库</th><th class="c">License</th><th class="c">处置</th><th>说明</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><code>bonc-ai/expense-assistant</code></td>
+          <td class="c"><span class="tag t-ok">Apache-2.0</span></td>
+          <td class="c"><span class="tag t-ok">选为基座</span></td>
+          <td>规则外置、字段级溯源、置信度门控、GB/T 42965、数电票 XML/OFD 解析</td>
+        </tr>
+        <tr>
+          <td><code>PathiRohith/ExpenseIQ</code></td>
+          <td class="c"><span class="tag t-ok">MIT</span></td>
+          <td class="c"><span class="tag t-info">借鉴设计</span></td>
+          <td>RAG 制度问答、人工覆盖判定、审计日志；未复制源码</td>
+        </tr>
+        <tr>
+          <td><code>zsitvat/Reimbursement-RAG-assistant</code></td>
+          <td class="c"><span class="tag t-risk">无 License</span></td>
+          <td class="c"><span class="tag t-gray">仅参考理念</span></td>
+          <td>主动追问机制（信息不全时问而非猜）</td>
+        </tr>
+        <tr>
+          <td><code>AMANxSHARMA01/auditable-expense-agent</code></td>
+          <td class="c"><span class="tag t-risk">无 License</span></td>
+          <td class="c"><span class="tag t-gray">仅参考理念</span></td>
+          <td>"LLM is advisory; policy is law"；确定性护栏与 HITL</td>
+        </tr>
+        <tr>
+          <td><code>Chuan1130/invoice-agent-system</code></td>
+          <td class="c"><span class="tag t-risk">无 License</span></td>
+          <td class="c"><span class="tag t-gray">不用</span></td>
+          <td>作者声明仅为技术展示</td>
+        </tr>
+        <tr>
+          <td><code>TheDevilspear/Expense-Claim-Assistant</code></td>
+          <td class="c"><span class="tag t-risk">无 License</span></td>
+          <td class="c"><span class="tag t-gray">不用</span></td>
+          <td>未采用</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="note risk" style="margin-top:12px">
+      <b>合规红线：</b>标注「无 License」的 4 个项目，按 GitHub 服务条款默认「保留所有权利」，
+      其代码<b>一行都未进入本仓库</b>，仅参考其公开表达的设计理念。
+      Apache-2.0 义务已履行：保留 LICENSE / NOTICE、修改文件登记于 <code>engine/CHANGES.md</code>。
+    </div>
+  </section>
+
+  <!-- 已修缺陷 -->
+  <section>
+    <h2>六、打通引擎时修复的缺陷<span>全部登记在 engine/CHANGES.md</span></h2>
+    <table>
+      <thead><tr><th>问题</th><th>后果</th><th class="c">性质</th></tr></thead>
+      <tbody>
+        <tr><td><code>extract_appendices</code> 无存在性判断</td>
+          <td>目录内无 SKILL.md 时 init 直接 FileNotFoundError</td>
+          <td class="c"><span class="tag t-info">青禾修复</span></td></tr>
+        <tr><td>企业制度包路径指向不存在的 <code>lib/company/</code></td>
+          <td>加载不到企业制度</td><td class="c"><span class="tag t-info">青禾修复</span></td></tr>
+        <tr><td><code>cap["per"]</code> 硬取键</td>
+          <td>财务漏填 per 会导致整个工作区初始化失败</td>
+          <td class="c"><span class="tag t-info">青禾修复</span></td></tr>
+        <tr><td><code>r["applies_to"]</code> 硬取键</td>
+          <td>票据规则漏填会导致整条规则库编译失败</td>
+          <td class="c"><span class="tag t-info">青禾修复</span></td></tr>
+        <tr><td>自带 schema 与自带制度包字段命名不一致</td>
+          <td>上游自己的 policy.json 也过不了自己的 schema</td>
+          <td class="c"><span class="tag t-risk">上游缺陷</span></td></tr>
+      </tbody>
+    </table>
+    <div class="note" style="margin-top:12px">
+      曾尝试把 <code>lib/</code> 扁平化到 <code>engine/</code>，触发一连串路径断点，
+      <b>已回退为上游原目录结构</b>，只做最小改动。这是「基座未经社区验证」的实证。
+    </div>
+  </section>
+
+  <!-- 待办 -->
+  <section>
+    <h2>七、待办与风险<span>前两项卡在你这</span></h2>
+    <table>
+      <thead><tr><th style="width:32px" class="c">#</th><th>事项</th><th class="c">归属</th><th class="c">阻塞程度</th></tr></thead>
+      <tbody>
+        <tr><td class="c">1</td><td>确认单据数据源：接现有费控/ERP，还是本系统自建</td>
+          <td class="c"><span class="tag t-risk">你确认</span></td><td class="c"><span class="tag t-risk">阻塞 B</span></td></tr>
+        <tr><td class="c">2</td><td><code>qinghe.json</code> 全部 PLACEHOLDER 由财务逐项确认（限额、抬头、税号、科目）</td>
+          <td class="c"><span class="tag t-risk">你确认</span></td><td class="c"><span class="tag t-risk">阻塞上线</span></td></tr>
+        <tr><td class="c">3</td><td>用青禾真实数电票 XML/OFD 对 engine 做回归</td>
+          <td class="c"><span class="tag t-warn">待做</span></td><td class="c"><span class="tag t-risk">阻塞上线</span></td></tr>
+        <tr><td class="c">4</td><td>企业微信/钉钉 消息收发与用户身份映射</td>
+          <td class="c"><span class="tag t-warn">待做</span></td><td class="c"><span class="tag t-warn">阻塞交付</span></td></tr>
+        <tr><td class="c">5</td><td>ReportStatus 扩展 5 态 / trace 增加 finance 角色 / 置信度门控加 finance 档</td>
+          <td class="c"><span class="tag t-info">已登记</span></td><td class="c"><span class="tag t-gray">迭代</span></td></tr>
+      </tbody>
+    </table>
+    <div class="note risk" style="margin-top:12px">
+      <b>最大风险：基座 star 0、仅 1 次提交、无社区验证。</b>
+      已实测可跑通，但票据解析的准确率必须用青禾真实票据验证后才能采信。
+    </div>
+  </section>
+
+  <div class="foot">
+    青禾报销助手_wolf · 自研 2,347 行 / 复用内核 4,229 行 · 验证 42 项全通过 · 无 License 违规
+  </div>
+
+</div>
+</body>
+</html>

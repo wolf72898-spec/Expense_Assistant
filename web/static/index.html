@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>青禾报销助手_wolf · 运行看板</title>
+<style>
+:root{
+  --bg:#f5f6f8; --card:#fff; --line:#e2e6ea; --line2:#eef0f3;
+  --ink:#171a1e; --ink2:#484e56; --ink3:#7c838c;
+  --ok:#177a48; --okbg:#e6f4ec;
+  --warn:#a86200; --warnbg:#fdf2e2;
+  --risk:#ad241d; --riskbg:#fdeae9;
+  --info:#17579f; --infobg:#e8f0fa;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.6;
+  font-family:"PingFang SC","Microsoft YaHei",-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:1120px;margin:0 auto;padding:22px 18px 60px}
+
+.hd{border-bottom:2px solid var(--ink);padding-bottom:14px;margin-bottom:16px}
+.hd h1{font-size:22px;font-weight:700}
+.hd .sub{color:var(--ink3);font-size:12.5px;margin-top:5px}
+.banner{background:var(--ink);color:#fff;border-radius:8px;padding:11px 16px;
+  font-size:13px;margin-bottom:18px}
+.banner b{color:#ffd479}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:20px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:11px 14px}
+.stat .n{font-size:20px;font-weight:700}
+.stat .l{font-size:11.5px;color:var(--ink3)}
+
+section{background:var(--card);border:1px solid var(--line);border-radius:10px;
+  padding:16px 18px;margin-bottom:16px}
+h2{font-size:14.5px;font-weight:700;margin-bottom:12px;padding-left:9px;border-left:4px solid var(--info)}
+h2 span{font-weight:400;font-size:11.5px;color:var(--ink3);margin-left:8px}
+
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+input[type=text]{flex:1;min-width:240px;padding:8px 11px;border:1px solid var(--line);
+  border-radius:6px;font-size:13.5px;font-family:inherit}
+input:focus{outline:none;border-color:var(--info)}
+button{padding:7px 14px;border:1px solid var(--info);background:var(--info);color:#fff;
+  border-radius:6px;font-size:13px;cursor:pointer;font-family:inherit}
+button:hover{filter:brightness(1.08)}
+button.ghost{background:#fff;color:var(--ink2);border-color:var(--line)}
+button.warn{background:#fff;color:var(--risk);border-color:var(--risk)}
+button:disabled{opacity:.5;cursor:not-allowed}
+.chip{padding:5px 11px;border:1px solid var(--line);background:#fff;border-radius:14px;
+  font-size:12.5px;cursor:pointer;color:var(--ink2)}
+.chip:hover{border-color:var(--info);color:var(--info)}
+.chip.on{background:var(--infobg);border-color:var(--info);color:var(--info);font-weight:600}
+
+.out{background:#fafbfc;border:1px solid var(--line2);border-radius:7px;
+  padding:12px 14px;font-size:13px;white-space:pre-wrap;min-height:44px}
+.out .cite{color:var(--info);font-size:12.5px;margin-top:7px;display:block}
+.empty{color:var(--ink3)}
+
+table{width:100%;border-collapse:collapse;font-size:12.8px}
+th{background:#f1f3f5;text-align:left;padding:7px 10px;color:var(--ink2);
+  border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:7px 10px;border-bottom:1px solid var(--line2);vertical-align:top}
+tr:last-child td{border-bottom:none}
+td.c,th.c{text-align:center}
+
+.tag{display:inline-block;padding:1px 7px;border-radius:4px;font-size:11.5px;font-weight:600}
+.t-ok{background:var(--okbg);color:var(--ok)}
+.t-warn{background:var(--warnbg);color:var(--warn)}
+.t-risk{background:var(--riskbg);color:var(--risk)}
+.t-info{background:var(--infobg);color:var(--info)}
+.t-gray{background:#eef0f3;color:var(--ink3)}
+
+.click{cursor:pointer;color:var(--info);text-decoration:underline}
+.note{font-size:12.5px;color:var(--ink3);margin-top:8px}
+pre{background:#1b1f24;color:#dfe4ea;padding:12px 14px;border-radius:7px;
+  font-size:12px;overflow-x:auto;white-space:pre-wrap;max-height:340px;overflow-y:auto;
+  font-family:Consolas,"SFMono-Regular",monospace}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hd">
+    <h1>青禾报销助手_wolf · 运行看板</h1>
+    <div class="sub">本地运行 · 数据为演示数据 · 制度 QH-EXP-001 数值为占位模板</div>
+  </div>
+
+  <div class="banner">
+    核心原则：<b>AI 负责引制度、做初判、标来源；事实认定权与付款决定权归财务岗。</b>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <!-- A 制度问答 -->
+  <section>
+    <h2>在线试问制度<span>需求 A · 只检索已发布且生效中的条款</span></h2>
+    <div class="row">
+      <input type="text" id="q" placeholder="例如：北京住3晚3000元能报多少" value="住宿费标准多少">
+      <button onclick="ask()">提问</button>
+    </div>
+    <div class="row">
+      <span class="chip" onclick="sq(this,'住宿费标准多少')">住宿标准</span>
+      <span class="chip" onclick="sq(this,'北京住3晚3000元能报多少')">北京住3晚3000元</span>
+      <span class="chip" onclick="sq(this,'市内交通上限是多少')">市内交通</span>
+      <span class="chip" onclick="sq(this,'业务招待需要什么材料')">业务招待</span>
+      <span class="chip" onclick="sq(this,'团建费能报吗')">团建费（未覆盖）</span>
+      <span class="chip" onclick="sq(this,'我的个税怎么算')">个税（越界）</span>
+    </div>
+    <div class="out" id="aOut"><span class="empty">提问后这里显示答案与制度引用</span></div>
+  </section>
+
+  <!-- B 单据查询 -->
+  <section>
+    <h2>查我的单据<span>需求 B · 切换身份可验证越权拦截</span></h2>
+    <div class="row" id="idChips"></div>
+    <div class="out" id="cOut"><span class="empty">加载中…</span></div>
+    <div class="note">用「李四」身份点开 RPT-2026-0001，会看到「查无此单」——不泄露单据是否存在。</div>
+  </section>
+
+  <!-- D 财务复核 -->
+  <section>
+    <h2>财务复核队列<span>需求 D · 按溯源风险排序，未复核阻断付款</span></h2>
+    <div class="row">
+      <button onclick="loadQueue()">刷新队列</button>
+      <span class="note" style="margin:0">仅 finance 角色可访问</span>
+    </div>
+    <div id="rOut"><span class="empty">点击刷新队列</span></div>
+  </section>
+
+  <!-- C 制度 -->
+  <section>
+    <h2>生效制度类目<span>需求 C · 由制度中枢编译产出</span></h2>
+    <div class="row"><button class="ghost" onclick="loadCats()">加载类目</button></div>
+    <div id="pOut"><span class="empty">点击加载</span></div>
+  </section>
+
+  <!-- 制度版本 -->
+  <section>
+    <h2>制度版本与变更审计<span>需求 C</span></h2>
+    <div id="vOut"><span class="empty">加载中…</span></div>
+  </section>
+
+  <!-- 运行验证 -->
+  <section>
+    <h2>在线运行验证<span>执行真实测试脚本</span></h2>
+    <div class="row"><button onclick="runTests()" id="btnTest">运行全部验证</button>
+      <span class="note" style="margin:0">会实际执行 tests/ 下的脚本，约需几秒</span></div>
+    <div id="tOut"><span class="empty">点击运行</span></div>
+  </section>
+
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let curUser = "E001";
+
+function tag(t, cls){ return `<span class="tag ${cls}">${t}</span>`; }
+
+async function loadStatus(){
+  const r = await fetch('/api/status'); const d = await r.json();
+  $('stats').innerHTML = `
+    <div class="stat"><div class="n">${d.policy_refs.length ? d.policy_refs[0] : '无'}</div><div class="l">生效制度版本</div></div>
+    <div class="stat"><div class="n">${d.clause_count}</div><div class="l">条款切片</div></div>
+    <div class="stat"><div class="n">${d.audit_count}</div><div class="l">变更审计记录</div></div>
+    <div class="stat"><div class="n">${d.pending_review}</div><div class="l">待财务复核</div></div>
+    <div class="stat"><div class="n">${d.versions.length}</div><div class="l">制度版本数</div></div>`;
+  $('idChips').innerHTML = d.identities.map(i =>
+    `<span class="chip ${i.id===curUser?'on':''}" onclick="setUser('${i.id}',this)">${i.name}（${i.id}·${i.roles.join('/')}）</span>`).join('');
+  $('vOut').innerHTML = `<table><thead><tr><th>版本</th><th class="c">状态</th><th>生效起</th><th>生效止</th><th>审批人</th></tr></thead><tbody>
+    ${d.versions.map(v=>`<tr><td>${v.ref}</td><td class="c">${
+      v.status==='published'?tag('已发布','t-ok'):v.status==='superseded'?tag('已取代','t-gray'):tag(v.status,'t-info')
+    }</td><td>${v.effective_from}</td><td>${v.effective_to||'—'}</td><td>${v.approved_by||'—'}</td></tr>`).join('')}
+  </tbody></table>`;
+}
+
+function setUser(u, el){
+  curUser = u;
+  document.querySelectorAll('#idChips .chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  loadClaims();
+}
+function sq(el, q){ $('q').value = q; ask(); }
+
+async function ask(){
+  const q = $('q').value.trim(); if(!q) return;
+  $('aOut').innerHTML = '<span class="empty">查询中…</span>';
+  const r = await fetch('/api/ask', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({question:q, user:curUser})});
+  const d = await r.json();
+  const head = d.escalated ? tag('已转人工','t-warn') : tag('已回答','t-ok');
+  $('aOut').innerHTML = `${head} <span class="tag t-gray">路由：${d.route}</span>
+${d.answer}
+${d.citations.length ? '<span class="cite">引用：'+d.citations.join(' ｜ ')+'</span>' : ''}`;
+}
+
+async function loadClaims(){
+  $('cOut').innerHTML = '<span class="empty">加载中…</span>';
+  const r = await fetch(`/api/claims?user=${curUser}`); const d = await r.json();
+  if(!d.records.length){ $('cOut').innerHTML = '<span class="empty">该身份下没有单据</span>'; return; }
+  let h = '<table><thead><tr><th>单号</th><th>标题</th><th class="c">金额</th><th class="c">状态</th><th>说明</th></tr></thead><tbody>';
+  d.records.forEach(x=>{
+    const st = x.status==='approved'?'t-ok':x.status==='rejected'?'t-risk':x.status==='approving'?'t-info':'t-gray';
+    h += `<tr><td class="click" onclick="detail('${x.claim_id}')">${x.claim_id}</td>
+      <td>${x.title}</td><td class="c">${x.amount.toFixed(2)}</td>
+      <td class="c">${tag(x.status_label, st)}</td>
+      <td>${x.reject_reason || (x.pending_review?`待复核 ${x.pending_review} 项`:'') || '—'}</td></tr>`;
+  });
+  $('cOut').innerHTML = h + '</tbody></table>';
+}
+
+async function detail(cid){
+  const r = await fetch(`/api/claims/${cid}?user=${curUser}`);
+  if(r.status === 404){
+    const e = await r.json();
+    $('cOut').innerHTML = `<span class="tag t-risk">越权被拦截</span>\n${e.detail}\n\n（用「${curUser}」查 ${cid}）`;
+    return;
+  }
+  const d = await r.json();
+  $('cOut').innerHTML = `<span class="tag t-ok">查询成功</span>\n${d.text}`;
+}
+
+async function loadQueue(){
+  $('rOut').innerHTML = '<span class="empty">加载中…</span>';
+  const r = await fetch('/api/review/queue?user=F001');
+  if(r.status === 403){ $('rOut').innerHTML = '<span class="tag t-risk">403</span> 该功能仅面向 finance 角色'; return; }
+  const d = await r.json();
+  if(!d.items.length){ $('rOut').innerHTML = '<span class="empty">队列已清空，全部事实均已核实</span>'; return; }
+  const tc = t => t==='inferred'?'t-risk':t==='extracted'?'t-warn':'t-ok';
+  let h = '<table><thead><tr><th>编号</th><th>单据</th><th>字段</th><th>值</th><th>来源</th><th class="c">置信度</th><th class="c">风险</th><th class="c">操作</th></tr></thead><tbody>';
+  d.items.forEach(f=>{
+    h += `<tr><td>${f.fact_id}</td><td>${f.claim_id}</td><td>${f.field}</td><td>${f.value}</td>
+      <td>${tag(f.provenance+' · '+f.trust, tc(f.trust))}</td>
+      <td class="c">${f.confidence.toFixed(2)}</td><td class="c">${f.risk}</td>
+      <td class="c"><button style="padding:3px 9px;font-size:12px" onclick="act('${f.fact_id}','confirm','')">确认</button>
+      <button class="warn" style="padding:3px 9px;font-size:12px" onclick="act('${f.fact_id}','reject','发票抬头不符')">驳回</button></td></tr>`;
+  });
+  $('rOut').innerHTML = h + '</tbody></table>';
+}
+
+async function act(fid, action, reason){
+  const r = await fetch('/api/review/act', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({fact_id:fid, action, reason, user:'F001'})});
+  const d = await r.json();
+  if(r.status !== 200){ alert(d.detail || '操作失败'); return; }
+  await loadQueue(); await loadStatus();
+  const box = document.createElement('div');
+  box.className = 'out';
+  box.style.marginTop = '10px';
+  box.innerHTML = `<span class="tag ${d.payable?'t-ok':'t-risk'}">付款闸门：${d.payable?'放行':'阻断'}</span> ${d.gate_reason}`;
+  $('rOut').appendChild(box);
+}
+
+async function loadCats(){
+  const r = await fetch('/api/policy/categories'); const d = await r.json();
+  let h = `<div class="note" style="margin-bottom:8px">制度来源：${d.policy_refs.join(', ')}</div>
+    <table><thead><tr><th>类目</th><th>名称</th><th class="c">标准</th><th class="c">单位</th><th>分城市</th></tr></thead><tbody>`;
+  d.categories.forEach(c=>{
+    h += `<tr><td>${c.key}</td><td>${c.label}</td><td class="c">${c.cap?c.cap:'—'}</td>
+      <td class="c">${c.per||'—'}</td><td>${Object.entries(c.by_city||{}).map(([k,v])=>k+' '+v).join('、')||'—'}</td></tr>`;
+  });
+  $('pOut').innerHTML = h + '</tbody></table>';
+}
+
+async function runTests(){
+  const b = $('btnTest'); b.disabled = true; b.textContent = '运行中…';
+  $('tOut').innerHTML = '<span class="empty">执行中，请稍候…</span>';
+  try{
+    const r = await fetch('/api/runtests'); const d = await r.json();
+    let h = '';
+    for(const [k,v] of Object.entries(d)){
+      h += `<div style="margin-bottom:10px"><span class="tag ${v.code===0?'t-ok':'t-risk'}">${
+        k==='guards'?'内控护栏':'A/B/D 端到端'} ${v.code===0?'全部通过':'存在失败'}</span>
+        <pre>${v.output.replace(/</g,'&lt;')}</pre></div>`;
+    }
+    $('tOut').innerHTML = h;
+  }catch(e){ $('tOut').innerHTML = '<span class="tag t-risk">执行失败</span> '+e; }
+  b.disabled = false; b.textContent = '运行全部验证';
+  loadStatus();
+}
+
+loadStatus(); loadClaims();
+</script>
+</body>
+</html>

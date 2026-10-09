@@ -1,0 +1,220 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:expense-ontology:expense-policy:1.0",
+  "title": "Expense Policy — rules the gap engine evaluates",
+  "description": "Company-specific rules kept outside the skill code. Swap this file to change 报销制度 without touching the agent.",
+  "type": "object",
+  "required": [
+    "policy_id",
+    "report_currency",
+    "categories"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "policy_id": {
+      "type": "string"
+    },
+    "report_currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$"
+    },
+    "require_project": {
+      "type": "boolean",
+      "default": true
+    },
+    "require_purpose": {
+      "type": "boolean",
+      "default": true
+    },
+    "submission_window_days": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Max days between expense_date and packaging."
+    },
+    "invoice_title": {
+      "type": "object",
+      "description": "发票抬头 — buyer details every invoice must carry.",
+      "required": [
+        "name",
+        "tax_id"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tax_id": {
+          "type": "string",
+          "pattern": "^[0-9A-Z]{15,20}$"
+        },
+        "address": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "bank": {
+          "type": "string"
+        },
+        "account": {
+          "type": "string"
+        },
+        "invoice_types": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Invoice types the title applies to (Chinese 发票 only)."
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$",
+          "description": "Only items in this currency are checked (CNY)."
+        }
+      }
+    },
+    "categories": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "required_fields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Dotted paths inside ExpenseItem, e.g. trip.from."
+          },
+          "required_evidence": {
+            "type": "array",
+            "description": "AND of groups; each group is an OR of evidence kinds.",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1
+            }
+          },
+          "recommended_evidence": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1
+            }
+          },
+          "cap": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "amount",
+              "per"
+            ],
+            "properties": {
+              "amount": {
+                "type": "number",
+                "minimum": 0
+              },
+              "per": {
+                "enum": [
+                  "item",
+                  "night",
+                  "day",
+                  "person"
+                ]
+              },
+              "by_city": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              },
+              "mode": {
+                "enum": [
+                  "warn",
+                  "clip"
+                ],
+                "default": "warn",
+                "description": "clip = reimbursable amount is reduced to the cap."
+              }
+            }
+          }
+        }
+      }
+    },
+    "invoice_titles": {
+      "type": "array",
+      "description": "All 发票抬头 / 税务组织 the company accepts as buyer (org invoice_title rule).",
+      "items": {
+        "type": "object"
+      }
+    },
+    "organization": {
+      "type": "object",
+      "description": "Company block: id, legal_name, bip_tenant, systems."
+    },
+    "receipt": {
+      "type": "object",
+      "description": "Compiled receipt / invoice rules (verification, status, line items, uniqueness, ingestion routes, 摘要名称)."
+    },
+    "workflow": {
+      "type": "array",
+      "description": "Backend process rules (BIP / OA) the package guides the employee through.",
+      "items": {
+        "type": "object"
+      }
+    },
+    "_ledger": {
+      "type": "object",
+      "description": "Injected per draft: invoice numbers already used in the employee's other reports."
+    },
+    "rule_set": {
+      "type": "object",
+      "description": "The company rule set this compiled policy represents"
+    },
+    "exception_policy": {
+      "type": "object"
+    },
+    "grades": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "coa": {
+      "type": "object",
+      "description": "Chart of Accounts: accounts {code: name} + ordered mapping lines (category, project prefix → account)"
+    },
+    "allocation": {
+      "type": "object",
+      "description": "Cost-allocation requirements: require_charge_code, require_budget_id"
+    },
+    "_projects": {
+      "type": "object",
+      "description": "Injected per draft: project registry from the A-box (code → name, charge_code, budget_id, budget_status)"
+    },
+    "credentials": {
+      "type": "object",
+      "description": "Compiled national credential rules (core layer) + company acceptance (org layer)"
+    },
+    "judgments": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "R-box judgments answered by TypeSafe Jev (core layer)"
+    },
+    "_judged_classes": {
+      "type": "object"
+    }
+  }
+}

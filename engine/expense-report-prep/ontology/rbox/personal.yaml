@@ -1,0 +1,35 @@
+# R-box · personal layer — this employee's own rules (authority: user; evolved by skill-evaluate-and-evolve)
+layer: personal
+authority: user
+version: 1
+
+# Recall rules: from a node of key_class walk `path`, propose a value for `fills`.
+# mode: auto = apply without asking when auto_when holds; suggest = always ask; off = never offer.
+recall:
+  - {id: SUG-SELF-PROJECT,      key_class: exp:Employee, path: [exp:worksOn],         fills: report.default_project, mode: suggest, auto_when: {min_share: 0.8, min_sources: 2}}
+  - {id: SUG-SELF-INSTRUMENT,   key_class: exp:Employee, path: [exp:usesInstrument],  fills: item.payment_method,    mode: suggest, auto_when: {min_share: 0.8, min_sources: 2}}
+  - {id: SUG-SELF-HOTEL,        key_class: exp:Employee, path: [exp:stayedAt],        fills: item.merchant,          mode: suggest, auto_when: {min_share: 0.8, min_sources: 2}}
+  - {id: SUG-SELF-ROUTE,        key_class: exp:Employee, path: [exp:travelsRoute],    fills: item.trip,              mode: suggest, auto_when: {min_share: 0.8, min_sources: 2}}
+  - {id: SUG-MERCHANT-CATEGORY, key_class: exp:Merchant, path: [exp:typicalCategory], fills: item.category,          mode: auto,    auto_when: {min_share: 0.9, min_sources: 1}}
+  - {id: SUG-MERCHANT-PROJECT,  key_class: exp:Merchant, path: [exp:usedForProject],  fills: item.project,           mode: suggest, auto_when: {min_share: 0.8, min_sources: 2}}
+  - {id: SUG-HOTEL-CITY,        key_class: exp:Hotel,    path: [exp:locatedIn],       fills: item.trip.city,         mode: auto,    auto_when: {min_share: 0.9, min_sources: 1}}
+  - {id: SUG-ROUTE-CATEGORY,    key_class: exp:Route,    path: [exp:typicalCategory], fills: item.category,          mode: auto,    auto_when: {min_share: 0.9, min_sources: 1}}
+  - {id: SUG-ROUTE-PROJECT,     key_class: exp:Route,    path: [exp:usedForProject],  fills: item.project,           mode: suggest, auto_when: {min_share: 0.8, min_sources: 2}}
+  - {id: SUG-SELF-PAYEE,        key_class: exp:Employee, path: [exp:reimbursedTo],    fills: report.payee,           mode: auto,    auto_when: {min_share: 1.0, min_sources: 1}}
+
+# Capture-time prompts: when an item of this kind is being captured, ask for these in the same turn.
+# ask: field:<path> | evidence:<kinds> | fx_rate | attendees | confirm:<field>
+prompts: []
+
+# Personal checks: stricter-than-company reminders the user wants (compiled as info-level recommended evidence),
+# plus the invoice-title rule (kind: invoice_title, title_ref → A-box exp:InvoiceTitle), which blocks mis-titled invoices.
+personal_checks: []
+
+# Meta-rules for skill-evaluate-and-evolve (how this R-box may change itself).
+evolution:
+  min_support: 2              # distinct runs showing the same pattern before a personal rule is added
+  promote: {acceptance: 0.75, min_offers: 3}   # recall rule suggest → auto
+  demote:  {acceptance: 0.3,  min_offers: 3}   # recall rule → suggest/off
+  ocr_confirm: {min_corrections: 2}
+  auto_apply: [abox, personal]                 # layers the evolver may change without asking
+  org_changes: propose_only                    # company rules are never edited on the employee side

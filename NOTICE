@@ -1,0 +1,43 @@
+青禾报销助手_wolf (Qinghe Expense Assistant · wolf)
+Copyright 2026 青禾
+
+本产品包含基于开源项目修改的代码，详见 THIRD_PARTY_LICENSES.md。
+
+────────────────────────────────────────────────────────────────────
+组成部分一：规则与凭证内核（engine/ 目录）
+────────────────────────────────────────────────────────────────────
+源自 Expense Assistant (报销助手)
+Copyright 2026 BONC
+License: Apache License, Version 2.0（见 engine/LICENSE-UPSTREAM）
+来源: https://github.com/bonc-ai/expense-assistant
+基线版本: 0.3.1 (commit 673580d)
+
+青禾已对该部分作出修改，修改内容记录于 engine/CHANGES.md。
+按 Apache-2.0 第 4(b) 条，所有修改文件均已在文件头标注变更声明。
+
+上游 NOTICE 原文声明：
+  - 示例企业制度包 (company/policy.json) 与全部测试样本均为虚构数据。
+  - GB/T 42965 仅对齐要素名称，未包含标准正文。
+  青禾已整体替换企业制度包，不再使用其虚构数据。
+
+────────────────────────────────────────────────────────────────────
+组成部分二：制度问答与审计覆盖（qa/ 与 review/ 部分逻辑）
+────────────────────────────────────────────────────────────────────
+参考 ExpenseIQ 的设计思路（RAG 制度问答、人工覆盖判定、审计留痕）
+Copyright 2026 PathiRohith
+License: MIT
+来源: https://github.com/PathiRohith/ExpenseIQ
+说明: 仅借鉴其设计思路与数据模型，未直接复制其源代码。
+
+────────────────────────────────────────────────────────────────────
+未采用的仓库（无 License，仅参考其公开设计文档）
+────────────────────────────────────────────────────────────────────
+以下项目在 GitHub 上未声明 License，按 GitHub 服务条款默认保留所有权利。
+本项目未复制、修改或分发其任何源代码，仅参考其公开表达的设计理念：
+
+  - zsitvat/Reimbursement-RAG-assistant
+       借鉴：Agentic RAG 编排、信息不全时主动追问而非猜测
+  - AMANxSHARMA01/auditable-expense-agent
+       借鉴：核心理念 "LLM is advisory; policy is law"（模型只建议，策略即法律）
+  - Chuan1130/invoice-agent-system
+       借鉴：LLM 决定想问什么，代码决定实际允许发生什么

@@ -1,0 +1,24 @@
+{
+  "name": "expense-assistant",
+  "version": "0.3.1",
+  "description": "Employee-side expense reimbursement assistant (报销助手): turns receipts, 数电票 XML/OFD/PDF, photos and spoken notes into versioned, schema-conformant expense report packages, with a layered R-box (national GB/T 42965 credential rules, company pack, personal rules), optional TypeSafe Jev judgments, and a personal ontology memory that learns from every run.",
+  "author": {
+    "name": "BONC"
+  },
+  "keywords": [
+    "expense",
+    "reimbursement",
+    "报销",
+    "ontology",
+    "t-box",
+    "r-box",
+    "a-box",
+    "employee",
+    "数电票",
+    "OFD",
+    "GB/T 42965",
+    "invoice"
+  ],
+  "license": "Apache-2.0",
+  "repository": "https://github.com/bonc-ai/expense-assistant"
+}

@@ -1,0 +1,143 @@
+# R-box · core layer — relation axioms of the expense segment (authority: ontology; changes only via skill release)
+layer: core
+authority: ontology
+version: 3
+
+characteristics:
+  exp:locatedIn:  [transitive]
+  exp:supersedes: [transitive]
+
+inverses:
+  - {id: INV-ITEM, property: exp:hasItem, inverse: exp:itemOf}
+
+chains:   # p1 ∘ p2 ⊑ p3
+  - {id: CH-ITEM-TRIP-PROJECT, chain: [exp:partOfTrip, exp:forProject], implies: exp:forProject,
+     doc: an item inherits its trip's project}
+  - {id: CH-ITEM-REPORT-PROJECT, chain: [exp:itemOf, exp:forProject], implies: exp:forProject,
+     doc: an item without its own project inherits the report's}
+
+weighting: "score = Σ per-source edges (stated ×3, observed ×1, inferred ×0.5); share = score / Σ scores; ties → most recent last_seen"
+
+learning:   # how a published report becomes A-box memory (implemented by `learn`)
+  - {id: L-SELF-PROJECT, pattern: "report.default_project | item.project → person:self exp:worksOn project"}
+  - {id: L-MERCHANT,     pattern: "item.merchant → merchant (class by category); self exp:usedMerchant; exp:typicalCategory; exp:usedForProject"}
+  - {id: L-HOTEL,        pattern: "lodging → Hotel exp:locatedIn City(trip.city); self exp:stayedAt; nightly_rate"}
+  - {id: L-ROUTE,        pattern: "trip.from/to → Route(origin,destination); self exp:travelsRoute; exp:typicalCategory; exp:usedForProject"}
+  - {id: L-INSTRUMENT,   pattern: "item.payment_method → self exp:usesInstrument"}
+  - {id: L-REPORT-GRAPH, pattern: "report/version/items/evidence nodes and their edges"}
+
+# ── Financial credentials (票据) — national-standard layer ──────────────────────────────────────────────────────
+# Structure checks for Chinese 发票 are aligned to GB/T 42965.1/.2-2023 by element *name*; element identifiers and
+# lengths must be confirmed against the standard text before they are used for interchange. Foreign invoices,
+# receipts and paper vouchers are first-class credentials with their own (lighter) core. Company acceptance rules
+# (which credentials a claim may rest on) live in the org layer, not here.
+standards:
+  - {id: STD-GBT42965-1, code: "GB/T 42965.1-2023", title: "电子发票业务数据规范 第1部分：基本要素", issuer: 国家税务总局, effective: "2023-08-06"}
+  - {id: STD-GBT42965-2, code: "GB/T 42965.2-2023", title: "电子发票业务数据规范 第2部分：特定要素", issuer: 国家税务总局}
+  - {id: STD-MOF-EVC, code: "电子凭证会计数据标准（推广应用版）", issuer: 财政部,
+     doc: "数电票、增值税电子专/普票、铁路电子客票、航空运输电子客票行程单、财政电子票据、银行电子回单等的会计数据结构"}
+
+credential_classes:   # class → jurisdiction, standards, default evidence kinds / invoice types that imply it
+  exp:DigitalInvoice:       {jurisdiction: CN, standards: [STD-GBT42965-1, STD-GBT42965-2, STD-MOF-EVC], invoice_types: [e_invoice], label: 数电发票（全电发票）}
+  exp:VATSpecialInvoice:    {jurisdiction: CN, standards: [STD-GBT42965-1, STD-MOF-EVC], invoice_types: [vat_special], label: 增值税专用发票}
+  exp:VATOrdinaryInvoice:   {jurisdiction: CN, standards: [STD-GBT42965-1, STD-MOF-EVC], invoice_types: [vat_general], label: 增值税普通发票}
+  exp:RailwayETicket:       {jurisdiction: CN, standards: [STD-GBT42965-2, STD-MOF-EVC], invoice_types: [rail_e_ticket], kinds: [rail_ticket], label: 铁路电子客票}
+  exp:AirETicketItinerary:  {jurisdiction: CN, standards: [STD-GBT42965-2, STD-MOF-EVC], invoice_types: [air_itinerary], kinds: [air_itinerary], label: 航空运输电子客票行程单}
+  exp:TaxiReceipt:          {jurisdiction: CN, kinds: [taxi_receipt], label: 出租车票}
+  exp:TollReceipt:          {jurisdiction: CN, standards: [STD-GBT42965-2], kinds: [toll_receipt], label: 通行费票据}
+  exp:FiscalReceipt:        {jurisdiction: CN, standards: [STD-MOF-EVC], kinds: [fiscal_receipt], label: 财政电子票据}
+  exp:BankReceipt:          {jurisdiction: CN, standards: [STD-MOF-EVC], kinds: [bank_receipt], label: 银行电子回单}
+  exp:HotelReceipt:         {kinds: [hotel_folio], label: 酒店水单 / Hotel folio}
+  exp:ForeignInvoice:       {jurisdiction: foreign, invoice_types: [foreign_invoice], kinds: [foreign_invoice], label: 境外发票 / Foreign invoice}
+  exp:ForeignReceipt:       {jurisdiction: foreign, kinds: [foreign_receipt], label: 境外收据 / Foreign receipt}
+  exp:PaperReceipt:         {kinds: [paper_receipt], label: 纸质小票 / Paper receipt}
+  exp:CardSlip:             {kinds: [card_slip], label: 刷卡签购单 / Card slip}
+  exp:OtherReceipt:         {invoice_types: [receipt], kinds: [receipt], label: 其他收据}
+
+special_scenarios:    # GB/T 42965.2-2023 特定要素 business scenarios
+  [建筑服务, 不动产销售, 不动产经营租赁服务, 代收车船税, 货物运输服务, 旅客运输服务, 通行费, 航空旅客运输服务, 铁路旅客运输服务, 差额征税]
+
+trust_ranking:        # which representation wins when several exist for one credential (XML > OFD > PDF > image/paper)
+  {xml: 4, ofd: 3, pdf: 2, email_html: 2, image: 1, paper: 1, other: 1}
+
+privacy_excluded_elements:   # present on some vouchers (e.g. 铁路电子客票) but never captured by this ontology
+  [证件号码, 身份证号, 身份证件号码, id_number, passport_number, traveler_id]
+
+credential_rules:
+  - {id: CR-CN-CORE, kind: required_elements, standard: STD-GBT42965-1, severity: warning,
+     applies_to: {credential_class: [exp:DigitalInvoice, exp:VATSpecialInvoice, exp:VATOrdinaryInvoice]},
+     elements: [identity.invoice_number, identity.issue_date, seller.name, seller.taxpayer_id, buyer.name, buyer.taxpayer_id,
+                totals.amount_excl_tax, totals.tax_amount, totals.total_amount, line_items],
+     doc: "基本要素：发票号码、开票日期、销售方/购买方名称及纳税人识别号、金额、税额、价税合计、项目明细"}
+  - {id: CR-CN-CORE-CODE, kind: required_elements, standard: STD-GBT42965-1, severity: warning,
+     applies_to: {credential_class: [exp:VATSpecialInvoice, exp:VATOrdinaryInvoice]}, elements: [identity.invoice_code],
+     doc: 税控发票（非数电）另有发票代码}
+  - {id: CR-CN-SPECIAL-BUYER, kind: required_elements, standard: STD-GBT42965-1, severity: info,
+     applies_to: {credential_class: [exp:VATSpecialInvoice]}, elements: [buyer.address, buyer.phone, buyer.bank_name, buyer.bank_account],
+     doc: 专票购买方地址电话、开户行及账号}
+  - {id: CR-CN-RAIL, kind: required_elements, standard: STD-GBT42965-2, scenario: 铁路旅客运输服务, severity: warning,
+     applies_to: {credential_class: [exp:RailwayETicket]},
+     elements: [identity.invoice_number, identity.issue_date, special.elements.traveler_name, special.elements.travel_date,
+                special.elements.departure, special.elements.destination, special.elements.carrier_no, special.elements.seat_class,
+                totals.total_amount], doc: "旅客证件号码不采集（隐私）"}
+  - {id: CR-CN-AIR, kind: required_elements, standard: STD-GBT42965-2, scenario: 航空旅客运输服务, severity: warning,
+     applies_to: {credential_class: [exp:AirETicketItinerary]},
+     elements: [special.elements.traveler_name, special.elements.travel_date, special.elements.departure,
+                special.elements.destination, special.elements.carrier_no, special.elements.ticket_number, totals.total_amount]}
+  - {id: CR-CN-TOLL, kind: required_elements, standard: STD-GBT42965-2, scenario: 通行费, severity: info,
+     applies_to: {credential_class: [exp:TollReceipt]}, elements: [special.elements.plate_number, special.elements.travel_date, totals.total_amount]}
+  - {id: CR-FOREIGN-CORE, kind: required_elements, severity: warning,
+     applies_to: {credential_class: [exp:ForeignInvoice, exp:ForeignReceipt, exp:PaperReceipt, exp:CardSlip, exp:HotelReceipt, exp:OtherReceipt]},
+     elements: [seller.name, identity.issue_date, totals.total_amount, totals.currency],
+     doc: "境外发票/收据/纸质小票：商户、日期、金额、币种；票号、税额(VAT/GST)建议记录"}
+  - {id: CR-SUM-TAX, kind: consistency, check: excl_plus_tax_eq_total, tolerance: 0.01, severity: warning,
+     doc: 金额 + 税额 = 价税合计}
+  - {id: CR-SUM-LINES, kind: consistency, check: lines_sum_eq_excl, tolerance: 0.05, severity: warning,
+     doc: 明细金额合计 = 金额；明细税额合计 = 税额}
+  - {id: CR-CLAIM-TOTAL, kind: consistency, check: claim_le_credential_total, tolerance: 0.01, severity: blocker,
+     doc: "报销金额不得超过票面价税合计（低于票面视为部分报销，提示）"}
+  - {id: CR-ID-MATCH, kind: consistency, check: invoice_number_matches_item, severity: warning, doc: 条目发票号与票面一致}
+
+# ── System One judgments (TypeSafe Jev) ─────────────────────────────────────────────────────────────────────────
+# Deterministic R-box rules always run in code. A judgment is a narrow question for the cases code cannot decide from
+# unstructured invoice data; it is asked only when its guard holds, only with the state it names, and it acts only above
+# its confidence gate (auto ≥ gate.auto; confirm between gate.floor and gate.auto; below floor → escalate to the agent /
+# the employee). Results are cached per state hash and stored in report.json › judgments with model + request id.
+judgments:
+  - id: J-CATEGORY
+    handler: category
+    informs: [ORG-FLD-*, ORG-EVD-*, ORG-CAP-*]
+    doc: 由票面项目名称、销售方判断费用类别，与条目类别不一致时提示（类别决定适用哪些公司规则）
+    question: {type: choice, instructions: "Which expense category does this Chinese invoice / receipt belong to? Judge from `line_items[].item_name` (tax classification such as *住宿服务*, *餐饮服务*, *运输服务*), `seller` and `type_label`."}
+    gate: {auto: 0.85, floor: 0.6}
+    severity: warning
+  - id: J-BUYER-TITLE
+    handler: buyer_title
+    informs: [ORG invoice_title rule, PC-INVOICE-TITLE]
+    doc: 购买方名称与登记抬头文字不同且无税号可比时，判断是否为同一法律主体（OCR 噪声、全半角、括号）
+    question: {type: noul, instructions: "`buyer_on_invoice` names the same legal entity as `registered_title`.",
+               criteria: {true: "Same company; differences are only OCR noise, full-width vs half-width characters, spacing or bracket style.",
+                          false: "A different company, a branch or subsidiary, a person, or text too incomplete to identify the company."}}
+    gate: {auto: 0.9, floor: 0.6}
+    severity: blocker
+  - id: J-PERSONAL-SPEND
+    handler: personal_spend
+    informs: [ORG-CAP-*, CR-CLAIM-TOTAL]
+    doc: 票面明细是否含个人或不可报销消费（迷你吧、洗衣、烟酒、娱乐、礼品等）
+    question: {type: noul, instructions: "At least one entry in `line_items` or `folio_text` is personal or non-reimbursable consumption (minibar, alcohol, tobacco, laundry, spa, entertainment for oneself, gifts, souvenirs) rather than the business expense itself."}
+    gate: {auto: 0.85, floor: 0.6}
+    severity: warning
+  - id: J-FOLIO-MATCH
+    handler: folio_match
+    informs: [ORG-EVD-lodging-2, CR-CLAIM-TOTAL]
+    doc: 酒店水单与发票是否为同一次住宿、金额一致（无结构化字段时读水单文本）
+    question: {type: noul, instructions: "`folio_text` is the bill of the same hotel stay as `invoice` (same hotel, dates within `stay`, balance equal to `invoice.total_amount`)."}
+    gate: {auto: 0.85, floor: 0.6}
+    severity: warning
+  - id: J-CREDENTIAL-CLASS
+    handler: credential_class
+    informs: [ORG-CRED-ACCEPT, CR-CN-CORE, CR-FOREIGN-CORE]
+    doc: 未结构化的票据判断票据类别（决定适用的国家标准要素规则与公司接受规则）
+    question: {type: choice, instructions: "What kind of payment voucher is `document`? Use `file_name` and `text_sample`."}
+    gate: {auto: 0.85, floor: 0.6}
+    severity: info

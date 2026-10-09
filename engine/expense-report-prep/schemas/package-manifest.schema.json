@@ -1,0 +1,245 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:expense-ontology:package-manifest:1.0",
+  "title": "Expense report version manifest",
+  "description": "Written next to every versioned zip as <report_id>_vNNN.manifest.json and embedded in the zip as MANIFEST.json (embedded copy omits `zip`).",
+  "type": "object",
+  "required": [
+    "manifest_version",
+    "report_id",
+    "version",
+    "version_label",
+    "created_at",
+    "created_by",
+    "status",
+    "report_json_sha256",
+    "totals",
+    "counts",
+    "contents",
+    "lineage"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "manifest_version": {
+      "const": "1.0"
+    },
+    "report_id": {
+      "type": "string"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "version_label": {
+      "type": "string",
+      "pattern": "^v[0-9]{3,}$"
+    },
+    "parent_version": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "created_by": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "employee_id": {
+          "type": "string"
+        }
+      }
+    },
+    "session_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "incomplete",
+        "ready",
+        "submitted"
+      ]
+    },
+    "policy_id": {
+      "type": "string"
+    },
+    "report_schema": {
+      "type": "string"
+    },
+    "note": {
+      "type": "string"
+    },
+    "zip": {
+      "type": "object",
+      "required": [
+        "file",
+        "sha256",
+        "bytes"
+      ],
+      "properties": {
+        "file": {
+          "type": "string"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "bytes": {
+          "type": "integer"
+        }
+      }
+    },
+    "report_json_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "totals": {
+      "type": "object"
+    },
+    "counts": {
+      "type": "object",
+      "required": [
+        "items",
+        "evidence",
+        "gaps_blocker",
+        "gaps_warning"
+      ],
+      "properties": {
+        "items": {
+          "type": "integer"
+        },
+        "evidence": {
+          "type": "integer"
+        },
+        "gaps_blocker": {
+          "type": "integer"
+        },
+        "gaps_warning": {
+          "type": "integer"
+        },
+        "gaps_info": {
+          "type": "integer"
+        }
+      }
+    },
+    "contents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "path",
+          "sha256",
+          "bytes"
+        ],
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string"
+          },
+          "bytes": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "changes_from_parent": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "items_added": {
+          "type": "array"
+        },
+        "items_removed": {
+          "type": "array"
+        },
+        "items_changed": {
+          "type": "array"
+        },
+        "evidence_added": {
+          "type": "array"
+        },
+        "total_delta": {
+          "type": "number"
+        },
+        "status_from": {
+          "type": "string"
+        }
+      }
+    },
+    "lineage": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "version labels oldest → this"
+    },
+    "rbox": {
+      "type": "object",
+      "description": "R-box layer versions and compiled-policy hash the package was checked against",
+      "properties": {
+        "core_version": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "org_version": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "personal_version": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "policy_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "judgments": {
+      "type": "object",
+      "description": "TypeSafe Jev run the package was judged with",
+      "properties": {
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "run_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "calls": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      }
+    }
+  }
+}

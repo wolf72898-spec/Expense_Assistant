@@ -1,0 +1,706 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:expense-ontology:rbox-layer:1.0",
+  "title": "R-box layer (core | org | personal)",
+  "type": "object",
+  "required": [
+    "layer",
+    "authority",
+    "version"
+  ],
+  "properties": {
+    "layer": {
+      "enum": [
+        "core",
+        "org",
+        "personal"
+      ]
+    },
+    "authority": {
+      "enum": [
+        "ontology",
+        "company",
+        "user"
+      ]
+    },
+    "version": {
+      "type": [
+        "integer",
+        "string"
+      ]
+    },
+    "source": {
+      "type": "string"
+    },
+    "settings": {
+      "type": "object",
+      "properties": {
+        "report_currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        },
+        "require_project": {
+          "type": "boolean"
+        },
+        "require_purpose": {
+          "type": "boolean"
+        },
+        "submission_window_days": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "labels": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "invoice_title": {
+          "type": "object"
+        },
+        "invoice_titles": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "organization": {
+          "type": "object"
+        },
+        "grades": {
+          "type": [
+            "object",
+            "array"
+          ]
+        },
+        "grade_labels": {
+          "type": [
+            "object",
+            "array"
+          ]
+        },
+        "exception_policy": {
+          "type": [
+            "object",
+            "array"
+          ]
+        },
+        "chart_of_accounts": {
+          "type": [
+            "object",
+            "array"
+          ]
+        },
+        "allocation": {
+          "type": [
+            "object",
+            "array"
+          ]
+        }
+      }
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/BusinessRule"
+      }
+    },
+    "recall": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/RecallRule"
+      }
+    },
+    "prompts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Prompt"
+      }
+    },
+    "personal_checks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/BusinessRule"
+      }
+    },
+    "evolution": {
+      "type": "object"
+    },
+    "rule_sets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "min_grade": {
+            "type": "string"
+          },
+          "extends": {
+            "type": "string"
+          },
+          "overrides": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "rule"
+              ],
+              "properties": {
+                "rule": {
+                  "type": "string"
+                },
+                "set": {
+                  "type": "object"
+                },
+                "scale": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "doc": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "add_rules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/BusinessRule"
+            }
+          },
+          "coa_overrides": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "standards": {
+      "type": [
+        "array",
+        "object"
+      ]
+    },
+    "credential_classes": {
+      "type": [
+        "array",
+        "object"
+      ]
+    },
+    "special_scenarios": {
+      "type": [
+        "array",
+        "object"
+      ]
+    },
+    "trust_ranking": {
+      "type": [
+        "array",
+        "object"
+      ]
+    },
+    "privacy_excluded_elements": {
+      "type": [
+        "array",
+        "object"
+      ]
+    },
+    "credential_rules": {
+      "type": [
+        "array",
+        "object"
+      ]
+    },
+    "judgments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "handler",
+          "question",
+          "gate"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "handler": {
+            "enum": [
+              "category",
+              "buyer_title",
+              "personal_spend",
+              "folio_match",
+              "credential_class"
+            ]
+          },
+          "informs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "doc": {
+            "type": "string"
+          },
+          "question": {
+            "type": "object",
+            "required": [
+              "type"
+            ]
+          },
+          "gate": {
+            "type": "object",
+            "required": [
+              "auto",
+              "floor"
+            ],
+            "properties": {
+              "auto": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "floor": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            }
+          },
+          "severity": {
+            "enum": [
+              "blocker",
+              "warning",
+              "info"
+            ]
+          },
+          "status": {
+            "enum": [
+              "active",
+              "disabled"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "AppliesTo": {
+      "type": "object",
+      "properties": {
+        "category": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "method": {
+          "type": "string"
+        },
+        "currency": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "Origin": {
+      "type": "object",
+      "properties": {
+        "by": {
+          "type": "string"
+        },
+        "delta_id": {
+          "type": "string"
+        },
+        "at": {
+          "type": "string"
+        },
+        "support": {
+          "type": "integer"
+        },
+        "evidence": {
+          "type": "array"
+        }
+      }
+    },
+    "BusinessRule": {
+      "type": "object",
+      "required": [
+        "id",
+        "kind",
+        "applies_to"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "required_evidence",
+            "recommended_evidence",
+            "required_field",
+            "cap",
+            "invoice_title",
+            "process",
+            "invoice_verification",
+            "invoice_status",
+            "invoice_line_items",
+            "invoice_unique",
+            "ingestion_route",
+            "summary_name",
+            "credential_acceptance"
+          ]
+        },
+        "applies_to": {
+          "$ref": "#/$defs/AppliesTo"
+        },
+        "any_of": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "field": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "number",
+          "minimum": 0
+        },
+        "per": {
+          "enum": [
+            "item",
+            "night",
+            "day",
+            "person"
+          ]
+        },
+        "mode": {
+          "enum": [
+            "warn",
+            "clip"
+          ]
+        },
+        "status": {
+          "enum": [
+            "active",
+            "disabled"
+          ]
+        },
+        "doc": {
+          "type": "string"
+        },
+        "origin": {
+          "$ref": "#/$defs/Origin"
+        },
+        "title_ref": {
+          "type": "string",
+          "description": "A-box node id of the exp:InvoiceTitle the invoices must carry"
+        },
+        "invoice_types": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "severity": {
+          "enum": [
+            "blocker",
+            "warning",
+            "info"
+          ]
+        },
+        "module": {
+          "enum": [
+            "tenant",
+            "ingestion",
+            "verification",
+            "save",
+            "reimbursement",
+            "oa_integrity",
+            "transfer_delete",
+            "metadata"
+          ]
+        },
+        "stage": {
+          "enum": [
+            "setup",
+            "collect",
+            "verify",
+            "save",
+            "select",
+            "import",
+            "transfer",
+            "remediate"
+          ]
+        },
+        "enforced_by": {
+          "enum": [
+            "agent",
+            "bip",
+            "oa"
+          ],
+          "description": "agent = checked in the employee package; bip/oa = done by the backend system, the agent prepares and guides"
+        },
+        "text": {
+          "type": "string"
+        },
+        "ref": {
+          "type": "string"
+        },
+        "basis": {
+          "enum": [
+            "explicit",
+            "inferred"
+          ]
+        },
+        "scope": {
+          "enum": [
+            "vat",
+            "non_vat",
+            "all"
+          ]
+        },
+        "sequence": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "methods": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "verify_fields": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "success_state": {
+          "type": "string"
+        },
+        "allowed": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "blocked": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "remediation": {
+          "type": "string"
+        },
+        "source_form": {
+          "type": "string"
+        },
+        "method": {
+          "type": "string"
+        },
+        "formats": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "fallback": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "template": {
+          "type": "string"
+        },
+        "action": {
+          "type": "string"
+        },
+        "blocking": {
+          "type": "boolean"
+        },
+        "domestic": {
+          "type": "object"
+        },
+        "overseas": {
+          "type": "object"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "enum": [
+                  "required_evidence",
+                  "recommended_evidence"
+                ]
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "any_of"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "required_field"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "field"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "cap"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "amount",
+              "per"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "invoice_title"
+              }
+            }
+          },
+          "then": {
+            "description": "personal rule → one A-box exp:InvoiceTitle node; company rule → the titles registered in settings.invoice_titles",
+            "anyOf": [
+              {
+                "required": [
+                  "title_ref"
+                ]
+              },
+              {
+                "required": [
+                  "invoice_types",
+                  "enforced_by"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "RecallRule": {
+      "type": "object",
+      "required": [
+        "id",
+        "key_class",
+        "path",
+        "fills",
+        "mode"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "key_class": {
+          "type": "string"
+        },
+        "path": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "fills": {
+          "type": "string"
+        },
+        "mode": {
+          "enum": [
+            "auto",
+            "suggest",
+            "off"
+          ]
+        },
+        "auto_when": {
+          "type": "object",
+          "properties": {
+            "min_share": {
+              "type": "number"
+            },
+            "min_sources": {
+              "type": "integer"
+            }
+          }
+        },
+        "origin": {
+          "$ref": "#/$defs/Origin"
+        }
+      }
+    },
+    "Prompt": {
+      "type": "object",
+      "required": [
+        "id",
+        "applies_to",
+        "ask",
+        "text"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "applies_to": {
+          "$ref": "#/$defs/AppliesTo"
+        },
+        "ask": {
+          "type": "string",
+          "description": "field:<path> | evidence:<kinds> | fx_rate | attendees | confirm:<field>"
+        },
+        "text": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "active",
+            "disabled"
+          ]
+        },
+        "origin": {
+          "$ref": "#/$defs/Origin"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,1464 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:expense-ontology:expense-report:1.0",
+  "title": "Expense Report Package — report.json",
+  "description": "Input contract of the expense ontology. One report = header + items + evidence + gaps + trace. Every item amount must be traceable to a source via provenance.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "report",
+    "items",
+    "evidence",
+    "gaps",
+    "trace"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "report": {
+      "$ref": "#/$defs/ReportHeader"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ExpenseItem"
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Evidence"
+      }
+    },
+    "gaps": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Gap"
+      }
+    },
+    "trace": {
+      "$ref": "#/$defs/Trace"
+    },
+    "package": {
+      "$ref": "#/$defs/PackageManifest"
+    },
+    "workflow": {
+      "type": "array",
+      "description": "BIP / OA submission steps derived from the company receipt rules",
+      "items": {
+        "type": "object",
+        "required": [
+          "step",
+          "text"
+        ],
+        "properties": {
+          "step": {
+            "type": "integer"
+          },
+          "module": {
+            "type": "string"
+          },
+          "enforced_by": {
+            "type": "string"
+          },
+          "rule_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "text": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "done": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "judgments": {
+      "type": "object",
+      "description": "System One (TypeSafe Jev) answers to the R-box judgments, with model, request id and confidence band. Never contains the API key.",
+      "properties": {
+        "model": {
+          "type": "string"
+        },
+        "run_at": {
+          "type": "string"
+        },
+        "calls": {
+          "type": "integer"
+        },
+        "wall_ms": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "input_tokens": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "unavailable": {
+          "type": "string"
+        },
+        "records": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "item_id",
+              "judgment_id",
+              "handler"
+            ],
+            "properties": {
+              "item_id": {
+                "type": "string"
+              },
+              "judgment_id": {
+                "type": "string"
+              },
+              "handler": {
+                "type": "string"
+              },
+              "informs": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "state_sha": {
+                "type": "string"
+              },
+              "item_sha": {
+                "type": "string"
+              },
+              "evidence_id": {
+                "type": "string"
+              },
+              "answer": {
+                "type": "object"
+              },
+              "decision": {
+                "type": [
+                  "string",
+                  "boolean",
+                  "null"
+                ]
+              },
+              "confidence": {
+                "type": "number"
+              },
+              "band": {
+                "enum": [
+                  "auto",
+                  "confirm",
+                  "escalate"
+                ]
+              },
+              "model": {
+                "type": "string"
+              },
+              "request_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "at": {
+                "type": "string"
+              },
+              "cached": {
+                "type": "boolean"
+              },
+              "unavailable": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "Id": {
+      "type": "string",
+      "pattern": "^[A-Z]{2,4}-[0-9A-Za-z_-]{1,40}$"
+    },
+    "Date": {
+      "type": "string",
+      "format": "date"
+    },
+    "DateTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "Currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$"
+    },
+    "Money": {
+      "type": "object",
+      "required": [
+        "value",
+        "currency"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "type": "number",
+          "minimum": 0
+        },
+        "currency": {
+          "$ref": "#/$defs/Currency"
+        }
+      }
+    },
+    "ReportStatus": {
+      "enum": [
+        "draft",
+        "incomplete",
+        "ready",
+        "submitted"
+      ]
+    },
+    "ReportHeader": {
+      "type": "object",
+      "required": [
+        "report_id",
+        "title",
+        "status",
+        "employee",
+        "currency",
+        "created_at",
+        "updated_at"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "report_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "$ref": "#/$defs/ReportStatus"
+        },
+        "employee": {
+          "type": "object",
+          "required": [
+            "name"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "employee_id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "department": {
+              "type": "string"
+            },
+            "cost_center": {
+              "type": "string"
+            }
+          }
+        },
+        "default_project": {
+          "$ref": "#/$defs/ProjectRef"
+        },
+        "purpose": {
+          "type": "string",
+          "description": "Business purpose of the trip / spend (出差事由)."
+        },
+        "period": {
+          "type": "object",
+          "required": [
+            "start",
+            "end"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "start": {
+              "$ref": "#/$defs/Date"
+            },
+            "end": {
+              "$ref": "#/$defs/Date"
+            },
+            "basis": {
+              "enum": [
+                "user",
+                "derived"
+              ],
+              "description": "derived = recomputed from item dates on every gap run; user = fixed, out-of-period items are flagged."
+            }
+          }
+        },
+        "currency": {
+          "$ref": "#/$defs/Currency",
+          "description": "Reimbursement currency; all totals are in this currency."
+        },
+        "totals": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "grand_total": {
+              "type": "number",
+              "minimum": 0
+            },
+            "item_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "by_category": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "by_project": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "by_account": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "by_budget": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "by_charge_code": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "number",
+                "minimum": 0
+              }
+            }
+          }
+        },
+        "policy_id": {
+          "type": "string",
+          "description": "Policy version the gaps were computed against."
+        },
+        "payee": {
+          "type": "object",
+          "description": "收款信息 — where finance pays this reimbursement (the employee's default reimbursement account).",
+          "required": [
+            "name",
+            "bank",
+            "account"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "alias": {
+              "type": "string"
+            },
+            "bank": {
+              "type": "string"
+            },
+            "branch": {
+              "type": "string"
+            },
+            "branch_address": {
+              "type": "string"
+            },
+            "cnaps": {
+              "type": "string",
+              "pattern": "^[0-9]{12}$",
+              "description": "联行号"
+            },
+            "account": {
+              "type": "string",
+              "pattern": "^[0-9]{12,19}$"
+            },
+            "account_masked": {
+              "type": "string"
+            }
+          }
+        },
+        "created_at": {
+          "$ref": "#/$defs/DateTime"
+        },
+        "updated_at": {
+          "$ref": "#/$defs/DateTime"
+        },
+        "rule_set": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id"
+          ],
+          "description": "Company rule set governing this report",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "label": {
+              "type": "string"
+            },
+            "basis": {
+              "enum": [
+                "grade",
+                "exception"
+              ]
+            },
+            "grade": {
+              "type": "string"
+            },
+            "exception": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "approval_ref": {
+                  "type": "string"
+                },
+                "recorded_at": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "ProjectRef": {
+      "type": "object",
+      "required": [
+        "code"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string"
+        },
+        "charge_code": {
+          "type": "string",
+          "description": "费用归集码 / charge code"
+        },
+        "budget_id": {
+          "type": "string",
+          "description": "预算编号 the expense draws on"
+        },
+        "budget_name": {
+          "type": "string"
+        },
+        "cost_center": {
+          "type": "string"
+        },
+        "origin": {
+          "enum": [
+            "user",
+            "profile_default",
+            "abox"
+          ],
+          "description": "where this allocation came from (report level: user-given or the employee's default project)"
+        }
+      }
+    },
+    "Category": {
+      "enum": [
+        "transport.air",
+        "transport.rail",
+        "transport.taxi",
+        "transport.car_rental",
+        "transport.fuel_toll",
+        "transport.other",
+        "lodging",
+        "meals",
+        "per_diem",
+        "entertainment",
+        "conference",
+        "communication",
+        "office_supplies",
+        "other"
+      ]
+    },
+    "ExpenseItem": {
+      "type": "object",
+      "required": [
+        "item_id",
+        "category",
+        "description",
+        "status",
+        "evidence_ids",
+        "provenance"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "item_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "category": {
+          "$ref": "#/$defs/Category"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "expense_date": {
+          "$ref": "#/$defs/Date",
+          "description": "Date of consumption; for lodging = check-in date."
+        },
+        "merchant": {
+          "type": "string"
+        },
+        "amount": {
+          "$ref": "#/$defs/Money",
+          "description": "Amount as shown on the voucher (original currency)."
+        },
+        "fx_rate": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Original → report currency. Omit when same currency."
+        },
+        "amount_reimbursable": {
+          "type": "number",
+          "minimum": 0,
+          "description": "In report currency, after policy caps. Computed by the packer."
+        },
+        "project": {
+          "$ref": "#/$defs/ProjectRef",
+          "description": "Overrides report.default_project."
+        },
+        "payment_method": {
+          "enum": [
+            "corporate_card",
+            "personal_card",
+            "cash",
+            "mobile_pay",
+            "company_paid",
+            "other"
+          ]
+        },
+        "invoice": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "invoice_type": {
+              "enum": [
+                "vat_special",
+                "vat_general",
+                "e_invoice",
+                "rail_e_ticket",
+                "air_itinerary",
+                "receipt",
+                "foreign_invoice",
+                "none"
+              ]
+            },
+            "invoice_no": {
+              "type": "string"
+            },
+            "invoice_code": {
+              "type": "string"
+            },
+            "issue_date": {
+              "$ref": "#/$defs/Date"
+            },
+            "seller_name": {
+              "type": "string"
+            },
+            "buyer_name": {
+              "type": "string"
+            },
+            "buyer_tax_id": {
+              "type": "string"
+            },
+            "tax_amount": {
+              "type": "number",
+              "minimum": 0
+            },
+            "tax_rate": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "check_code": {
+              "type": "string",
+              "description": "校验码（普票查验用，后6位即可）"
+            },
+            "amount_excl_tax": {
+              "type": "number",
+              "minimum": 0,
+              "description": "金额（不含税）— 专票查验要素"
+            },
+            "line_items": {
+              "type": "array",
+              "description": "发票明细 (项目名称 lines)",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "amount": {
+                    "type": "number"
+                  },
+                  "tax_rate": {
+                    "type": "number"
+                  },
+                  "tax_amount": {
+                    "type": "number"
+                  },
+                  "quantity": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "summary_name": {
+              "type": "string",
+              "description": "BIP 摘要名称 (searchable tag)"
+            },
+            "bip": {
+              "type": "object",
+              "additionalProperties": false,
+              "description": "State of this invoice in the company's e-invoice system / reimbursement system, as reported by the employee",
+              "properties": {
+                "save_status": {
+                  "enum": [
+                    "not_collected",
+                    "saved",
+                    "failed"
+                  ]
+                },
+                "verify_result": {
+                  "type": "string",
+                  "description": "BIP 查验结果, e.g. 相符"
+                },
+                "reimb_status": {
+                  "enum": [
+                    "unreported",
+                    "partially_reported",
+                    "reported"
+                  ]
+                },
+                "associated_docs": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "warnings": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "failure_reason": {
+                  "type": "string"
+                },
+                "oa_detail": {
+                  "enum": [
+                    "ok",
+                    "empty"
+                  ]
+                },
+                "transfer_to": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "trip": {
+          "type": "object",
+          "description": "Transport and lodging details.",
+          "additionalProperties": false,
+          "properties": {
+            "from": {
+              "type": "string"
+            },
+            "to": {
+              "type": "string"
+            },
+            "depart_at": {
+              "type": "string"
+            },
+            "arrive_at": {
+              "type": "string"
+            },
+            "carrier_no": {
+              "type": "string",
+              "description": "Train / flight number."
+            },
+            "seat_class": {
+              "type": "string"
+            },
+            "city": {
+              "type": "string"
+            },
+            "check_in": {
+              "$ref": "#/$defs/Date"
+            },
+            "check_out": {
+              "$ref": "#/$defs/Date"
+            },
+            "nights": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "country": {
+              "type": "string",
+              "pattern": "^[A-Z]{2}$",
+              "description": "ISO country of the expense (overseas detection)"
+            }
+          }
+        },
+        "attendees": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Meals / entertainment."
+        },
+        "evidence_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          },
+          "uniqueItems": true
+        },
+        "status": {
+          "enum": [
+            "complete",
+            "incomplete",
+            "flagged",
+            "excluded"
+          ]
+        },
+        "notes": {
+          "type": "string"
+        },
+        "provenance": {
+          "type": "object",
+          "description": "Field path (e.g. 'amount', 'trip.from') → where the value came from. Required for every present value field (enforced by the packer).",
+          "additionalProperties": {
+            "$ref": "#/$defs/FieldProvenance"
+          }
+        },
+        "accounting": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Resolved cost allocation + Chart of Accounts line (derived on every recompute; not user-edited)",
+          "properties": {
+            "project_code": {
+              "type": "string"
+            },
+            "project_name": {
+              "type": "string"
+            },
+            "charge_code": {
+              "type": "string"
+            },
+            "budget_id": {
+              "type": "string"
+            },
+            "cost_center": {
+              "type": "string"
+            },
+            "level": {
+              "enum": [
+                "item",
+                "report",
+                "profile_default"
+              ]
+            },
+            "filled_from_abox": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "account_code": {
+              "type": "string"
+            },
+            "account_name": {
+              "type": "string"
+            },
+            "coa_line": {
+              "type": "string"
+            },
+            "rule_set": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "description": "One reimbursable line. amount/expense_date may be absent while status=incomplete; the gap engine blocks packaging a 'ready' report without them. Every present value field must have a provenance entry."
+    },
+    "FieldProvenance": {
+      "type": "object",
+      "required": [
+        "source_id",
+        "method"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "source_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "locator": {
+          "type": "string",
+          "description": "e.g. 'page=1;bbox=…', 'utterance', 'filename'."
+        },
+        "method": {
+          "enum": [
+            "ocr",
+            "pdf_text",
+            "user_stated",
+            "inferred",
+            "policy_default",
+            "user_confirmed",
+            "xml",
+            "ofd_structured"
+          ]
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "raw": {
+          "type": "string",
+          "description": "Raw text span the value was read from."
+        }
+      }
+    },
+    "EvidenceKind": {
+      "enum": [
+        "invoice",
+        "e_invoice",
+        "rail_ticket",
+        "air_itinerary",
+        "boarding_pass",
+        "hotel_folio",
+        "taxi_receipt",
+        "payment_proof",
+        "receipt",
+        "approval",
+        "agenda",
+        "other",
+        "foreign_invoice",
+        "foreign_receipt",
+        "paper_receipt",
+        "card_slip",
+        "toll_receipt",
+        "fiscal_receipt",
+        "bank_receipt"
+      ]
+    },
+    "Evidence": {
+      "type": "object",
+      "required": [
+        "evidence_id",
+        "kind",
+        "path",
+        "sha256",
+        "source_id"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "evidence_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "kind": {
+          "$ref": "#/$defs/EvidenceKind"
+        },
+        "path": {
+          "type": "string",
+          "pattern": "^evidence/[^/]+$",
+          "description": "Path inside the zip."
+        },
+        "original_name": {
+          "type": "string"
+        },
+        "mime_type": {
+          "type": "string"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "pages": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "source_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "item_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          },
+          "uniqueItems": true
+        },
+        "extracted": {
+          "type": "object",
+          "description": "Free-form fields read from the voucher (for audit)."
+        },
+        "source_form": {
+          "enum": [
+            "original_electronic",
+            "non_source_pdf",
+            "paper_scan",
+            "photo",
+            "unknown"
+          ],
+          "description": "Provenance of the file: the issuer's original e-invoice file (pdf/ofd/xml) vs a scan/photo/non-source copy (org ingestion_route rules)"
+        },
+        "credential": {
+          "$ref": "#/$defs/FinancialCredential"
+        }
+      }
+    },
+    "Gap": {
+      "type": "object",
+      "required": [
+        "gap_id",
+        "type",
+        "severity",
+        "message"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "gap_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "item_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "type": {
+          "enum": [
+            "missing_evidence",
+            "missing_field",
+            "policy_limit",
+            "out_of_period",
+            "duplicate_suspect",
+            "unlinked_evidence",
+            "fx_missing",
+            "report_field",
+            "invoice_title_mismatch",
+            "invoice_verification",
+            "invoice_status",
+            "invoice_detail",
+            "source_file",
+            "allocation",
+            "unmapped_account",
+            "rule_set",
+            "credential_schema",
+            "credential_consistency",
+            "credential_acceptance",
+            "judgment"
+          ]
+        },
+        "severity": {
+          "enum": [
+            "blocker",
+            "warning",
+            "info"
+          ]
+        },
+        "requirement": {
+          "type": "string",
+          "description": "Machine-readable requirement, e.g. 'evidence:any_of[e_invoice,rail_ticket]' or 'field:trip.from'."
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable, in the user's language."
+        },
+        "action": {
+          "type": "string",
+          "description": "What the employee should do / fetch."
+        }
+      }
+    },
+    "Source": {
+      "type": "object",
+      "required": [
+        "source_id",
+        "type",
+        "received_at"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "source_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "type": {
+          "enum": [
+            "file",
+            "folder",
+            "utterance",
+            "system"
+          ]
+        },
+        "ref": {
+          "type": "string",
+          "description": "Original file path / folder / channel message id."
+        },
+        "text": {
+          "type": "string",
+          "description": "Verbatim utterance (for type=utterance)."
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "received_at": {
+          "$ref": "#/$defs/DateTime"
+        }
+      }
+    },
+    "TraceEvent": {
+      "type": "object",
+      "required": [
+        "seq",
+        "at",
+        "actor",
+        "op"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "at": {
+          "$ref": "#/$defs/DateTime"
+        },
+        "actor": {
+          "enum": [
+            "agent",
+            "user",
+            "system"
+          ]
+        },
+        "op": {
+          "enum": [
+            "init_report",
+            "add_source",
+            "create_item",
+            "update_item",
+            "delete_item",
+            "attach_evidence",
+            "link_evidence",
+            "unlink_evidence",
+            "merge_items",
+            "compute_gaps",
+            "set_status",
+            "package",
+            "credential",
+            "update_evidence",
+            "judge"
+          ]
+        },
+        "target": {
+          "type": "string",
+          "description": "Id of the affected object."
+        },
+        "source_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        },
+        "changes": {
+          "type": "object",
+          "description": "Field → new value (JSON-patch-lite)."
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "Trace": {
+      "type": "object",
+      "required": [
+        "sources",
+        "events"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "sources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Source"
+          }
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/TraceEvent"
+          }
+        }
+      }
+    },
+    "PackageManifest": {
+      "type": "object",
+      "required": [
+        "package_id",
+        "created_at",
+        "files"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "package_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "created_at": {
+          "$ref": "#/$defs/DateTime"
+        },
+        "policy_id": {
+          "type": "string"
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "path",
+              "sha256"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "path": {
+                "type": "string"
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "bytes": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      }
+    },
+    "CredentialParty": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "名称"
+        },
+        "taxpayer_id": {
+          "type": "string",
+          "description": "统一社会信用代码/纳税人识别号 (CN) or VAT/GST registration"
+        },
+        "address": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "bank_name": {
+          "type": "string"
+        },
+        "bank_account": {
+          "type": "string",
+          "description": "company accounts printed on 专票 only"
+        },
+        "country": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}$"
+        }
+      }
+    },
+    "FinancialCredential": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "credential_class"
+      ],
+      "description": "Structured content of one 票据. Layer 1 (national-standard, GB/T 42965.1/.2 aligned for 中国发票): identity, seller, buyer, totals, line_items, tax, special. Layer 2 (provenance): source. Enterprise extensions (BIP status, allocation) stay on the item, never here.",
+      "properties": {
+        "credential_class": {
+          "enum": [
+            "exp:DigitalInvoice",
+            "exp:VATSpecialInvoice",
+            "exp:VATOrdinaryInvoice",
+            "exp:RailwayETicket",
+            "exp:AirETicketItinerary",
+            "exp:TaxiReceipt",
+            "exp:TollReceipt",
+            "exp:FiscalReceipt",
+            "exp:BankReceipt",
+            "exp:HotelReceipt",
+            "exp:ForeignInvoice",
+            "exp:ForeignReceipt",
+            "exp:PaperReceipt",
+            "exp:CardSlip",
+            "exp:OtherReceipt"
+          ]
+        },
+        "jurisdiction": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}$",
+          "description": "CN, or the issuing country"
+        },
+        "standards": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "e.g. GB/T 42965.1-2023"
+        },
+        "identity": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "invoice_number": {
+              "type": "string",
+              "description": "发票号码"
+            },
+            "invoice_code": {
+              "type": "string",
+              "description": "发票代码"
+            },
+            "issue_date": {
+              "$ref": "#/$defs/Date"
+            },
+            "check_code": {
+              "type": "string",
+              "description": "校验码"
+            },
+            "receipt_number": {
+              "type": "string",
+              "description": "foreign / paper receipt no."
+            },
+            "type_label": {
+              "type": "string",
+              "description": "票种 as printed"
+            }
+          }
+        },
+        "seller": {
+          "$ref": "#/$defs/CredentialParty"
+        },
+        "buyer": {
+          "$ref": "#/$defs/CredentialParty"
+        },
+        "totals": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "amount_excl_tax": {
+              "type": "number"
+            },
+            "tax_amount": {
+              "type": "number"
+            },
+            "total_amount": {
+              "type": "number"
+            },
+            "total_amount_words": {
+              "type": "string",
+              "description": "价税合计（大写）"
+            },
+            "currency": {
+              "$ref": "#/$defs/Currency"
+            },
+            "tip": {
+              "type": "number"
+            }
+          }
+        },
+        "line_items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "item_name": {
+                "type": "string",
+                "description": "项目名称"
+              },
+              "specification": {
+                "type": "string",
+                "description": "规格型号"
+              },
+              "unit": {
+                "type": "string"
+              },
+              "quantity": {
+                "type": "number"
+              },
+              "unit_price": {
+                "type": "number"
+              },
+              "amount": {
+                "type": "number"
+              },
+              "tax_rate": {
+                "type": "number"
+              },
+              "tax_amount": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "tax": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "tax_scheme": {
+              "enum": [
+                "vat_cn",
+                "vat",
+                "gst",
+                "sales_tax",
+                "none",
+                "other"
+              ]
+            },
+            "tax_method": {
+              "type": "string",
+              "description": "计税方式，如 简易计税 / 差额征税"
+            }
+          }
+        },
+        "special": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "GB/T 42965.2 特定要素",
+          "properties": {
+            "scenario": {
+              "enum": [
+                "建筑服务",
+                "不动产销售",
+                "不动产经营租赁服务",
+                "代收车船税",
+                "货物运输服务",
+                "旅客运输服务",
+                "通行费",
+                "航空旅客运输服务",
+                "铁路旅客运输服务",
+                "差额征税"
+              ]
+            },
+            "elements": {
+              "type": "object",
+              "description": "scenario elements (traveler_name, travel_date, departure, destination, carrier_no, seat_class, ticket_number, plate_number …). 证件号码 are never stored."
+            }
+          }
+        },
+        "remarks": {
+          "type": "string",
+          "description": "备注"
+        },
+        "issuer_name": {
+          "type": "string",
+          "description": "开票人"
+        },
+        "payment": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "method": {
+              "type": "string"
+            },
+            "card_last4": {
+              "type": "string",
+              "pattern": "^[0-9]{4}$"
+            },
+            "paid_at": {
+              "type": "string"
+            }
+          }
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "format": {
+              "enum": [
+                "xml",
+                "ofd",
+                "pdf",
+                "email_html",
+                "image",
+                "paper",
+                "other"
+              ]
+            },
+            "trust_rank": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 4
+            },
+            "extraction_method": {
+              "enum": [
+                "xml",
+                "ofd_structured",
+                "pdf_text",
+                "ocr",
+                "manual"
+              ]
+            },
+            "digital_signature": {
+              "enum": [
+                "present_valid",
+                "present_unverified",
+                "absent",
+                "unknown"
+              ]
+            },
+            "authoritative": {
+              "type": "boolean"
+            },
+            "ofd_mismatch": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

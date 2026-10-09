@@ -1,0 +1,364 @@
+{
+  "_note": "青禾报销制度包 —— 【模板，上线前必须由财务逐项确认】。所有带 PLACEHOLDER 标记的数值均为占位示例，不可直接用于真实报销判定。",
+  "_status": "DRAFT_TEMPLATE",
+  "_confirm_required": [
+    "各费用类目限额（categories.*.cap）",
+    "发票抬头与纳税人识别号（invoice_titles）",
+    "职级体系与规则集（grades / rule_sets）",
+    "会计科目映射（chart_of_accounts）",
+    "票据规则中 enforced_by 的实际归属系统（bip / oa / agent）"
+  ],
+  "organization": {
+    "name": "青禾",
+    "legal_name": "PLACEHOLDER：营业执照全称",
+    "taxpayer_id": "PLACEHOLDER：统一社会信用代码"
+  },
+  "invoice_titles": [
+    {
+      "title": "PLACEHOLDER：公司全称",
+      "tax_id": "PLACEHOLDER：纳税人识别号",
+      "address": "PLACEHOLDER",
+      "phone": "PLACEHOLDER",
+      "bank_name": "PLACEHOLDER",
+      "bank_account": "PLACEHOLDER"
+    }
+  ],
+  "report_currency": "CNY",
+  "require_project": true,
+  "require_purpose": true,
+  "submission_window_days": 90,
+  "grades": [
+    "staff",
+    "manager",
+    "director",
+    "vp"
+  ],
+  "grade_labels": {
+    "staff": "员工",
+    "manager": "经理",
+    "director": "总监",
+    "vp": "副总裁及以上"
+  },
+  "categories": {
+    "transport.air": {
+      "label": "机票",
+      "required_fields": [
+        "trip.from",
+        "trip.to",
+        "trip.carrier_no"
+      ],
+      "required_evidence": [
+        [
+          "air_itinerary",
+          "e_invoice",
+          "invoice"
+        ]
+      ],
+      "recommended_evidence": [
+        [
+          "boarding_pass"
+        ]
+      ],
+      "cap": {
+        "amount": 0,
+        "mode": "warn",
+        "doc": "PLACEHOLDER：机票是否设舱位/折扣上限待财务定"
+      }
+    },
+    "transport.rail": {
+      "label": "火车/高铁",
+      "required_fields": [
+        "trip.from",
+        "trip.to"
+      ],
+      "required_evidence": [
+        [
+          "rail_ticket",
+          "e_invoice",
+          "invoice"
+        ]
+      ],
+      "cap": {
+        "amount": 0,
+        "mode": "warn",
+        "doc": "PLACEHOLDER：高铁座席等级限制待定（如二等座）"
+      }
+    },
+    "transport.taxi": {
+      "label": "市内交通",
+      "required_fields": [
+        "trip.from",
+        "trip.to"
+      ],
+      "required_evidence": [
+        [
+          "e_invoice",
+          "invoice",
+          "taxi_receipt"
+        ]
+      ],
+      "recommended_evidence": [
+        [
+          "payment_proof"
+        ]
+      ],
+      "cap": {
+        "amount": 300,
+        "per": "item",
+        "mode": "warn"
+      }
+    },
+    "transport.car_rental": {
+      "label": "租车",
+      "required_evidence": [
+        [
+          "e_invoice",
+          "invoice"
+        ]
+      ]
+    },
+    "transport.fuel_toll": {
+      "label": "油费/路桥",
+      "required_evidence": [
+        [
+          "e_invoice",
+          "invoice",
+          "receipt"
+        ]
+      ]
+    },
+    "transport.other": {
+      "label": "其他交通",
+      "required_evidence": [
+        [
+          "e_invoice",
+          "invoice",
+          "receipt"
+        ]
+      ]
+    },
+    "lodging": {
+      "label": "住宿",
+      "required_fields": [
+        "trip.city",
+        "trip.check_in",
+        "trip.check_out"
+      ],
+      "required_evidence": [
+        [
+          "e_invoice",
+          "invoice"
+        ],
+        [
+          "hotel_folio"
+        ]
+      ],
+      "cap": {
+        "amount": 500,
+        "per": "night",
+        "by_city": {
+          "北京": 800,
+          "上海": 800,
+          "深圳": 700,
+          "广州": 700
+        },
+        "mode": "clip",
+        "doc": "PLACEHOLDER：分城市标准需按青禾实际差旅城市表补齐"
+      }
+    },
+    "meals": {
+      "label": "餐费",
+      "required_evidence": [
+        [
+          "e_invoice",
+          "invoice",
+          "receipt"
+        ]
+      ],
+      "cap": {
+        "amount": 150,
+        "per": "person",
+        "mode": "warn"
+      }
+    },
+    "per_diem": {
+      "label": "出差补助",
+      "required_fields": [
+        "trip.city"
+      ],
+      "required_evidence": []
+    },
+    "entertainment": {
+      "label": "业务招待",
+      "required_fields": [
+        "attendees"
+      ],
+      "required_evidence": [
+        [
+          "e_invoice",
+          "invoice"
+        ],
+        [
+          "approval"
+        ]
+      ]
+    },
+    "conference": {
+      "label": "会议/培训",
+      "required_evidence": [
+        [
+          "e_invoice",
+          "invoice"
+        ]
+      ],
+      "recommended_evidence": [
+        [
+          "agenda"
+        ]
+      ]
+    },
+    "communication": {
+      "label": "通讯",
+      "required_evidence": [
+        [
+          "e_invoice",
+          "invoice"
+        ]
+      ]
+    },
+    "office_supplies": {
+      "label": "办公用品",
+      "required_evidence": [
+        [
+          "e_invoice",
+          "invoice"
+        ]
+      ]
+    },
+    "other": {
+      "label": "其他",
+      "required_evidence": [
+        [
+          "e_invoice",
+          "invoice",
+          "receipt"
+        ]
+      ]
+    }
+  },
+  "receipt_rules": [
+    {
+      "id": "QH-COL-01",
+      "kind": "ingestion_route",
+      "module": "ingestion",
+      "stage": "collect",
+      "enforced_by": "agent",
+      "text": "有电子源文件（数电票 XML / OFD / PDF）的发票，必须上传源文件，不得用照片替代",
+      "source_form": "original_electronic",
+      "method": "源文件上传",
+      "ref": "青禾制度模板 · 待确认",
+      "applies_to": {}
+    },
+    {
+      "id": "QH-COL-02",
+      "kind": "ingestion_route",
+      "module": "ingestion",
+      "stage": "collect",
+      "enforced_by": "agent",
+      "text": "纸质票据拍照或扫描识别，保存前须人工核对识别结果",
+      "source_form": "paper_scan",
+      "method": "图像识别",
+      "ref": "青禾制度模板 · 待确认",
+      "applies_to": {}
+    },
+    {
+      "id": "QH-VER-01",
+      "kind": "verification",
+      "module": "ingestion",
+      "stage": "verify",
+      "enforced_by": "bip",
+      "text": "发票保存前须完成增值税发票查验，查验状态异常票据不得入账",
+      "ref": "青禾制度模板 · 待确认",
+      "applies_to": {}
+    },
+    {
+      "id": "QH-DUP-01",
+      "kind": "duplicate",
+      "module": "ingestion",
+      "stage": "save",
+      "enforced_by": "agent",
+      "text": "同一发票号码不得在不同报销单中重复报销",
+      "ref": "青禾制度模板 · 待确认",
+      "applies_to": {}
+    },
+    {
+      "id": "QH-TITLE-01",
+      "kind": "invoice_title",
+      "module": "ingestion",
+      "stage": "save",
+      "enforced_by": "agent",
+      "text": "发票抬头与纳税人识别号须与公司登记信息完全一致",
+      "ref": "青禾制度模板 · 待确认",
+      "applies_to": {}
+    },
+    {
+      "id": "QH-WINDOW-01",
+      "kind": "period",
+      "module": "report",
+      "stage": "submit",
+      "enforced_by": "oa",
+      "text": "费用发生后须在 90 天内提交报销，超期须走特批",
+      "ref": "青禾制度模板 · 待确认",
+      "applies_to": {}
+    }
+  ],
+  "rule_sets": [
+    {
+      "id": "standard",
+      "label": "标准规则集",
+      "min_grade": "staff"
+    },
+    {
+      "id": "director",
+      "label": "总监级规则集",
+      "min_grade": "director",
+      "extends": "standard",
+      "overrides": [
+        {
+          "rule": "ORG-CAP-lodging*",
+          "scale": 1.5,
+          "doc": "PLACEHOLDER：总监住宿标准倍数待定"
+        }
+      ]
+    },
+    {
+      "id": "vp",
+      "label": "VP 级规则集",
+      "min_grade": "vp",
+      "extends": "standard",
+      "overrides": [
+        {
+          "rule": "ORG-CAP-lodging*",
+          "scale": 2.0,
+          "doc": "PLACEHOLDER：VP 住宿标准倍数待定"
+        }
+      ]
+    }
+  ],
+  "exception_policy": {
+    "requires_approval": true,
+    "approver_role": "finance",
+    "doc": "超标与例外一律需财务审批，AI 不得自行放行"
+  },
+  "chart_of_accounts": {
+    "transport": "PLACEHOLDER:6601.01",
+    "lodging": "PLACEHOLDER:6601.02",
+    "meals": "PLACEHOLDER:6601.03",
+    "entertainment": "PLACEHOLDER:6602.02"
+  },
+  "allocation": {
+    "require_project": true,
+    "require_cost_center": false,
+    "doc": "PLACEHOLDER：成本中心要求待财务确认"
+  }
+}
