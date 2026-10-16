@@ -2,13 +2,18 @@
 #
 # 分层说明：
 #   骨架模块（policy/ qa/ claim/ review/ bot/）—— 零依赖，只用 Python 标准库
-#   engine/（上游票据解析内核）—— 需要 pyyaml
+#   web/（运行看板）—— 需要 fastapi + uvicorn
+#   engine/（票据解析内核）—— 需要 pyyaml
 #
-# 只跑制度中枢、制度问答、单据查询、财务复核、IM 路由：
-#   不需要安装任何东西，直接 python scripts/demo.py
-#
-# 要跑票据解析（数电票 XML / OFD）：
+# 全量安装：
 #   pip install -r requirements.txt
+#
+# 只跑制度中枢、制度问答、单据查询、财务复核、IM 路由（不跑看板和票据解析）：
+#   无需安装，直接 python scripts/demo.py
+
+# ── web/ 运行看板 ──
+fastapi>=0.110           # Web 看板服务（python web/app.py）
+uvicorn>=0.27            # ASGI 服务器
 
 # ── engine 内核（来自上游 bonc-ai/expense-assistant）──
 pyyaml>=6.0              # 必需：R-box 本体（YAML）解析
@@ -18,7 +23,3 @@ pypdf>=4.0               # 推荐：PDF 票据文本抽取
 # ── 可选：接入真实 LLM 后启用 ──
 # typesafe-sdk           # 上游可选的置信度判定服务
 # openai                 # 若自接大模型做答案组织
-
-# ── 可选：生产化（当前骨架未启用）──
-# fastapi>=0.110         # 服务化
-# uvicorn>=0.27

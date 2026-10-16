@@ -151,7 +151,7 @@ def main() -> int:
     print("=" * 58)
     print(f"当前身份：{me.name}（{me.user_id}）")
     print(f"生效制度：{qa.registry.effective_refs()}")
-    print("输入 :help 看用法，:quit 退出。\n")
+    print("输入 :help 看用法。退出：quit / exit / :quit ｜ 身份：:emp :fin :admin :other\n")
 
     while True:
         try:
@@ -161,12 +161,15 @@ def main() -> int:
             return 0
         if not text:
             continue
-        if text.lower() in (":quit", ":q", "exit", "退出"):
-            print("已退出")
+        # 退出词：带冒号或不带都认，避免用户猜「quit」却被当成提问
+        if text.lower() in (":quit", ":q", ":exit", "quit", "exit", "q", "bye",
+                            "退出", "再见"):
+            print("\n已退出")
             return 0
         if text == ":help":
             print(HELP_TEXT + (FINANCE_HELP if me.is_finance else ""))
             print("\n身份切换：:emp / :other / :fin / :admin ｜ 查看身份：:who")
+            print("退出：quit / exit / :quit / 退出")
             continue
         if text == ":who":
             print(f"  身份：{me.name}（{me.user_id}）角色：{sorted(me.roles)}")

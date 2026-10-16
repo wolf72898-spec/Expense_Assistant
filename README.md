@@ -32,7 +32,7 @@ AI 的输出是「建议」，不是「结论」。
 ## 快速开始
 
 骨架模块（`policy/` `qa/` `claim/` `review/` `bot/`）**零第三方依赖**，Python 3.10+ 即可跑。
-票据解析内核 `engine/` 需要额外依赖。
+Web 看板（`fastapi`/`uvicorn`）与票据解析内核 `engine/`（`pyyaml`）需要安装依赖。
 
 ```bash
 git clone https://github.com/wolf72898-spec/Expense_Assistant.git
