@@ -4,6 +4,7 @@
 #   骨架模块（policy/ qa/ claim/ review/ bot/）—— 零依赖，只用 Python 标准库
 #   web/（运行看板）—— 需要 fastapi + uvicorn
 #   engine/（票据解析内核）—— 需要 pyyaml
+#   docs/fde-交付物/（FDE 交付物生成）—— 需要 python-docx + matplotlib + openpyxl
 #
 # 全量安装：
 #   pip install -r requirements.txt
@@ -19,6 +20,11 @@ uvicorn>=0.27            # ASGI 服务器
 pyyaml>=6.0              # 必需：R-box 本体（YAML）解析
 jsonschema>=4.20         # 推荐：制度 schema 校验，缺失时降级为必要键检查
 pypdf>=4.0               # 推荐：PDF 票据文本抽取
+
+# ── FDE 交付物生成脚本 ──
+python-docx>=1.1         # 02 行业分析报告、05 设计方案（docx）
+matplotlib>=3.8          # 03 / 04 流程图（PNG + SVG）
+openpyxl>=3.1            # 06 报价单（xlsx）
 
 # ── 可选：接入真实 LLM 后启用 ──
 # typesafe-sdk           # 上游可选的置信度判定服务

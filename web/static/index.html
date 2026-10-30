@@ -16,6 +16,21 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.6;
   font-family:"PingFang SC","Microsoft YaHei",-apple-system,"Segoe UI",sans-serif}
+
+/* 动态壁纸背景（视频循环播放） */
+.bg-video{position:fixed;inset:0;z-index:-2;overflow:hidden;background:#e8d9e2}
+.bg-video video{width:100%;height:100%;object-fit:cover;
+  filter:saturate(.96) brightness(1.05)}
+/* 暗角：压暗四角，消除边缘生硬的"白边"感 */
+.bg-video::after{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 42%,transparent 52%,rgba(110,90,130,.30) 100%)}
+/* 漂浮光点 */
+.bg-fx{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.bg-fx i{position:absolute;bottom:-24px;display:block;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.95),rgba(255,240,220,0) 70%);
+  animation:drift linear infinite}
+@keyframes drift{from{transform:translateY(0) translateX(0);opacity:0}
+  12%{opacity:.9}88%{opacity:.7}to{transform:translateY(-108vh) translateX(4vw);opacity:0}}
 .wrap{max-width:1120px;margin:0 auto;padding:22px 18px 60px}
 
 .hd{border-bottom:2px solid var(--ink);padding-bottom:14px;margin-bottom:16px}
@@ -30,8 +45,11 @@ body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.6;
 .stat .n{font-size:20px;font-weight:700}
 .stat .l{font-size:11.5px;color:var(--ink3)}
 
-section{background:var(--card);border:1px solid var(--line);border-radius:10px;
-  padding:16px 18px;margin-bottom:16px}
+section{background:rgba(255,255,255,.84);backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,.6);border-radius:10px;
+  padding:16px 18px;margin-bottom:16px;
+  box-shadow:0 4px 22px rgba(80,100,140,.10)}
 h2{font-size:14.5px;font-weight:700;margin-bottom:12px;padding-left:9px;border-left:4px solid var(--info)}
 h2 span{font-weight:400;font-size:11.5px;color:var(--ink3);margin-left:8px}
 
@@ -74,9 +92,32 @@ td.c,th.c{text-align:center}
 pre{background:#1b1f24;color:#dfe4ea;padding:12px 14px;border-radius:7px;
   font-size:12px;overflow-x:auto;white-space:pre-wrap;max-height:340px;overflow-y:auto;
   font-family:Consolas,"SFMono-Regular",monospace}
+
+/* 看板娘 */
+.mascot-wrap{position:fixed;right:6px;bottom:6px;z-index:60;text-align:center;pointer-events:none}
+.mascot-wrap img{width:230px;display:block;animation:floatY 4.5s ease-in-out infinite;
+  filter:drop-shadow(0 10px 24px rgba(28,95,176,.28))}
+.mascot-bubble{pointer-events:auto;cursor:pointer;background:#fff;border:1px solid var(--info);
+  color:var(--info);font-size:12px;padding:6px 10px;border-radius:12px 12px 2px 12px;
+  margin:0 auto 6px;width:max-content;max-width:200px;box-shadow:0 4px 12px rgba(0,0,0,.08)}
+@keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+@media(max-width:900px){.mascot-wrap{display:none}}
 </style>
 </head>
 <body>
+<div class="bg-video">
+  <video autoplay muted loop playsinline src="/static/assets/bg.mp4"></video>
+</div>
+<div class="bg-fx">
+  <i style="left:5%;  width:16px;height:16px;animation-duration:28s"></i>
+  <i style="left:16%; width:10px;height:10px;animation-duration:22s;animation-delay:6s"></i>
+  <i style="left:28%; width:20px;height:20px;animation-duration:34s;animation-delay:12s"></i>
+  <i style="left:42%; width:12px;height:12px;animation-duration:24s;animation-delay:3s"></i>
+  <i style="left:57%; width:18px;height:18px;animation-duration:30s;animation-delay:9s"></i>
+  <i style="left:70%; width:10px;height:10px;animation-duration:20s;animation-delay:15s"></i>
+  <i style="left:82%; width:15px;height:15px;animation-duration:27s;animation-delay:5s"></i>
+  <i style="left:93%; width:12px;height:12px;animation-duration:23s;animation-delay:11s"></i>
+</div>
 <div class="wrap">
 
   <div class="hd">
@@ -102,8 +143,8 @@ pre{background:#1b1f24;color:#dfe4ea;padding:12px 14px;border-radius:7px;
       <span class="chip" onclick="sq(this,'北京住3晚3000元能报多少')">北京住3晚3000元</span>
       <span class="chip" onclick="sq(this,'市内交通上限是多少')">市内交通</span>
       <span class="chip" onclick="sq(this,'业务招待需要什么材料')">业务招待</span>
-      <span class="chip" onclick="sq(this,'团建费能报吗')">团建费（未覆盖）</span>
-      <span class="chip" onclick="sq(this,'我的个税怎么算')">个税（越界）</span>
+      <span class="chip" onclick="sq(this,'报销时限是多久')">报销时限</span>
+      <span class="chip" onclick="sq(this,'发票抬头有什么要求')">发票抬头</span>
     </div>
     <div class="out" id="aOut"><span class="empty">提问后这里显示答案与制度引用</span></div>
   </section>
@@ -126,7 +167,22 @@ pre{background:#1b1f24;color:#dfe4ea;padding:12px 14px;border-radius:7px;
     <div id="rOut"><span class="empty">点击刷新队列</span></div>
   </section>
 
-  <!-- C 制度 -->
+  <!-- C 制度维护 -->
+  <section>
+    <h2>制度维护<span>需求 C · 起草 → 提交 → 财务审批发布，全程留痕</span></h2>
+    <div class="row">
+      <button onclick="pAct('revise')">① 起草修订（餐费 150→200）</button>
+      <button onclick="pAct('submit')">② 提交审批</button>
+      <button onclick="pAct('approve')">③ 财务审批发布</button>
+      <button class="ghost" onclick="loadPolicyState()">刷新状态</button>
+    </div>
+    <div class="out" id="pcOut"><span class="empty">加载中…</span></div>
+    <div id="pDiff"></div>
+    <div class="note">①② 由制度管理员执行；③ 必须由财务执行，且不得为起草人本人（内控硬规则）。
+      发布后引擎与问答立即使用新制度——发布完去上方问「餐费标准多少」验证。</div>
+  </section>
+
+  <!-- C 制度类目 -->
   <section>
     <h2>生效制度类目<span>需求 C · 由制度中枢编译产出</span></h2>
     <div class="row"><button class="ghost" onclick="loadCats()">加载类目</button></div>
@@ -147,6 +203,11 @@ pre{background:#1b1f24;color:#dfe4ea;padding:12px 14px;border-radius:7px;
     <div id="tOut"><span class="empty">点击运行</span></div>
   </section>
 
+</div>
+
+<div class="mascot-wrap">
+  <div class="mascot-bubble" id="mBubble" onclick="nextLine()">报销问题尽管问我~（点我换台词）</div>
+  <img src="/static/assets/mascot.webp" alt="看板娘">
 </div>
 
 <script>
@@ -277,7 +338,55 @@ async function runTests(){
   loadStatus();
 }
 
-loadStatus(); loadClaims();
+// ── 需求 C：制度维护 ──
+async function loadPolicyState(){
+  const r = await fetch('/api/policy/state'); const d = await r.json();
+  const L = d.latest;
+  $('pcOut').innerHTML =
+    `生效制度：${d.effective.join(', ') || '无'}<br>` +
+    (L ? `最新版本：${L.ref} · ${L.status} · 起草人 ${L.created_by}` +
+         (L.summary ? ` · ${L.summary}` : '') : '无');
+  $('pDiff').innerHTML = auditTable(d.audit);
+}
+function auditTable(rows){
+  if(!rows.length) return '';
+  return `<table><thead><tr><th>版本</th><th>操作</th><th>操作人</th><th>角色</th>
+    <th>时间</th><th>说明</th></tr></thead><tbody>` +
+    rows.map(a=>{
+      const dt = a.detail || {};
+      let note = dt.comment || dt.reason || dt.summary ||
+                 (dt.superseded_by ? '被 ' + dt.superseded_by + ' 取代' : '');
+      if(a.op==='approve') note = '审批发布' + (note ? '：' + note : '');
+      return `<tr><td>v${a.version}</td><td>${a.op}</td><td>${a.actor}</td>
+        <td>${a.actor_role}</td><td>${(a.at||'').slice(5,16)}</td><td>${note}</td></tr>`;
+    }).join('') + '</tbody></table>';
+}
+async function pAct(action){
+  const r = await fetch('/api/policy/act', {method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({action})});
+  const d = await r.json();
+  if(r.status !== 200){
+    $('pDiff').innerHTML = `<span class="tag t-risk">被内控拦截</span> ${d.detail}`;
+    await loadPolicyState(); return;
+  }
+  const msgs = {revise:'已起草新版本（draft，制度管理员）',
+                submit:'已提交审批（pending，版本已锁定不可编辑）',
+                approve:'财务审批通过，新制度已发布生效'};
+  $('pDiff').innerHTML = `<div style="margin-bottom:8px">
+    <span class="tag t-ok">${msgs[action]}</span> ${d.done.ref} · ${d.done.status}</div>`
+    + auditTable(d.audit);
+  await loadPolicyState(); await loadStatus();
+}
+
+// ── 看板娘台词 ──
+const M_LINES = ['报销问题尽管问我~','超标想绕过？会被拦下的哦','试试「北京住3晚3000元」',
+                 '财务没核完的单子，可不会打款','超期 90 天可就报不了啦，抓紧提交'];
+let mi = 0;
+function nextLine(){ mi = (mi + 1) % M_LINES.length;
+  $('mBubble').textContent = M_LINES[mi]; }
+
+loadStatus(); loadClaims(); loadPolicyState();
 </script>
 </body>
 </html>

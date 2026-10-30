@@ -12,8 +12,10 @@
 """
 from __future__ import annotations
 
+import json
 import subprocess
 import sys
+from datetime import date
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -208,6 +210,94 @@ def categories():
             for k, v in pol.get("categories", {}).items()
         ],
     }
+
+
+# ─────────────── 需求 C：制度维护（起草 → 审批 → 发布） ───────────────
+
+POLICY_ID = "QH-EXP-001"
+DRAFTER = "admin@qinghe"
+FINANCE = "finance@qinghe"
+
+
+class PolicyActIn(BaseModel):
+    action: str            # revise / submit / approve
+    meals_cap: float = 200  # 演示修订项：新餐费标准（元/人）
+
+
+def _policy_snapshot() -> dict:
+    """当前版本链与最新版本状态，供前端渲染流程按钮"""
+    hist = store.history(POLICY_ID)
+    latest = hist[0] if hist else None
+    return {
+        "effective": registry.effective_refs(),
+        "latest": {"version": latest.version, "status": latest.status,
+                   "ref": latest.ref, "created_by": latest.created_by,
+                   "summary": latest.summary} if latest else None,
+        "audit": [
+            {"version": a["version"], "op": a["op"], "actor": a["actor"],
+             "actor_role": a["actor_role"], "at": a["at"],
+             "detail": a.get("detail") or {}}
+            for a in store.audit_trail(POLICY_ID)
+        ][-12:],
+    }
+
+
+@app.get("/api/policy/state")
+def policy_state():
+    return _policy_snapshot()
+
+
+@app.post("/api/policy/act")
+def policy_act(body: PolicyActIn):
+    """需求 C 的三个动作。内控规则在后端强制：
+    revise/submit 只能制度管理员发起；approve 只能财务，
+    且审批人不得为起草人（PolicyStore 里校验）。"""
+    hist = store.history(POLICY_ID)
+    if not hist:
+        raise HTTPException(400, f"制度 {POLICY_ID} 不存在，请先运行 scripts/init_policy.py")
+    latest = hist[0]
+
+    try:
+        if body.action == "revise":
+            if latest.status not in ("published", "superseded"):
+                raise HTTPException(400,
+                    f"已有进行中的版本 {latest.ref}（{latest.status}），"
+                    f"请先完成 提交审批 → 财务发布，再发起新修订")
+            # 演示修订：基于现行内容，把餐费标准改成新值
+            content = json.loads(json.dumps(latest.content, ensure_ascii=False))
+            cat = content.setdefault("categories", {}).setdefault("meals", {})
+            old = (cat.get("cap") or {}).get("amount")
+            cat["cap"] = {**(cat.get("cap") or {}), "amount": body.meals_cap,
+                          "per": cat.get("cap", {}).get("per", "person"),
+                          "mode": cat.get("cap", {}).get("mode", "warn")}
+            pv = store.revise(POLICY_ID, content,
+                              effective_from=date.today().isoformat(),
+                              actor=DRAFTER,
+                              summary=f"餐费标准 {old} → {body.meals_cap} 元/人")
+            # 关键：条款必须随版本继承，否则新版发布后问答检索不到条款
+            store.clone_clauses(POLICY_ID, latest.version, pv.version)
+            if old is not None and old != body.meals_cap:
+                store.replace_clause_text(
+                    POLICY_ID, pv.version, category="meals",
+                    old=f"{old:g} 元/人", new=f"{body.meals_cap:g} 元/人")
+        elif body.action == "submit":
+            pv = store.submit(POLICY_ID, latest.version, actor=DRAFTER)
+        elif body.action == "approve":
+            pv = store.approve(POLICY_ID, latest.version, approver=FINANCE,
+                               comment="看板演示审批")
+            # 发布后重编译，引擎与问答立即用新制度
+            registry.export(ROOT / "company" / "policy.json")
+            registry.export(ROOT / "data" / "compiled" / "policy.json")
+        else:
+            raise HTTPException(400, "action 只能是 revise / submit / approve")
+    except HTTPException:
+        raise
+    except Exception as e:  # noqa: BLE001  （PolicyError 等内控拦截）
+        raise HTTPException(400, str(e)) from e
+
+    out = _policy_snapshot()
+    out["done"] = {"action": body.action, "ref": pv.ref, "status": pv.status}
+    return out
 
 
 @app.get("/api/runtests")

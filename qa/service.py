@@ -104,8 +104,8 @@ class PolicyQAService:
                 return Answer(question, "", escalated=True,
                               escalation_reason=f"制度中未定义该类目（{e}），转财务人工确认")
 
-        # 4. 制度咨询 → 条款检索
-        hits = self.retriever.search(question, top_k=3)
+        # 4. 制度咨询 → 条款检索（只取该日期生效版本的条款）
+        hits = self.retriever.search(question, top_k=3, day=day)
         if not hits or hits[0].score < RELEVANCE_FLOOR:
             return Answer(
                 question,

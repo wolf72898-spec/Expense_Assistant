@@ -291,6 +291,49 @@ class PolicyStore:
 
     # ─────────────────────── 条款（供 RAG 检索） ───────────────────────
 
+    def clone_clauses(self, policy_id: str, from_version: int,
+                      to_version: int) -> int:
+        """把某版本的条款复制为新版本条款。
+
+        制度修订时必须继承条款——否则新版发布后问答检索不到任何条款
+        （青禾实际踩过的坑：v2 发布后问答仍引用 v1 的旧数值）。
+        复制后由调用方按本次变更同步更新条款文本。"""
+        rows = self.conn.execute(
+            "SELECT * FROM policy_clauses WHERE policy_id=? AND version=?",
+            (policy_id, from_version)).fetchall()
+        n = 0
+        with self._lock:
+            for r in rows:
+                # clause_id 是主键，加版本后缀避免冲突
+                self.conn.execute(
+                    """INSERT OR REPLACE INTO policy_clauses
+                       (clause_id,policy_id,version,clause_no,title,text,category,tags)
+                       VALUES (?,?,?,?,?,?,?,?)""",
+                    (f"{r['clause_id']}-v{to_version}", policy_id, to_version,
+                     r["clause_no"], r["title"], r["text"], r["category"],
+                     r["tags"]))
+                n += 1
+            self.conn.commit()
+        return n
+
+    def replace_clause_text(self, policy_id: str, version: int, category: str,
+                            old: str, new: str) -> int:
+        """按本次制度变更同步更新条款文本（如「150 元/人」→「200 元/人」）。"""
+        rows = self.conn.execute(
+            """SELECT clause_id, text FROM policy_clauses
+               WHERE policy_id=? AND version=? AND category=?""",
+            (policy_id, version, category)).fetchall()
+        n = 0
+        with self._lock:
+            for r in rows:
+                if old and old in r["text"]:
+                    self.conn.execute(
+                        "UPDATE policy_clauses SET text=? WHERE clause_id=?",
+                        (r["text"].replace(old, new), r["clause_id"]))
+                    n += 1
+            self.conn.commit()
+        return n
+
     def replace_clauses(self, policy_id: str, version: int,
                         clauses: list[PolicyClause]) -> None:
         self.conn.execute(

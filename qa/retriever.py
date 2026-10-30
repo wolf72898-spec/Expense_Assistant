@@ -62,9 +62,13 @@ class ClauseRetriever:
         self.store = store
 
     def search(self, query: str, top_k: int = 3,
-               category: str | None = None) -> list[ScoredClause]:
-        """检索生效条款。返回结果按相关度降序。"""
-        clauses = self.store.clauses(category=category or None)
+               category: str | None = None,
+               day: str | None = None) -> list[ScoredClause]:
+        """检索条款。返回结果按相关度降序。
+
+        day 不传时只按「当前时点有效」过滤条款版本；
+        显式传 day 用于历史时点追溯。"""
+        clauses = self.store.clauses(category=category or None, day=day)
         if not clauses:
             return []
         qg = _grams(query)
